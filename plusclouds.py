@@ -130,14 +130,59 @@ if platform.system()=='Windows':
 
     #Disk
 
-    p = sp.Popen(["diskpart"], stdin=sp.PIPE)
+    p = sp.Popen(["diskpart"], stdout=sp.PIPE, stdin=sp.PIPE, stderr=sp.PIPE)
     commands=['select disk 0\n','select vol 2\n','extend\n','exit\n']
-	
     for command in commands:
         p.stdin.write(bytes(command,'utf-8'))
         time.sleep(.3)
 
+    #WinRM toggle
 
-#ssh_key='ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCqql6MzstZYh1TmWWv11q5O3pISj2ZFl9HgH1JLknLLx44+tXfJ7mIrKNxOOwxIxvcBF8PXSYvobFYEZjGIVCEAjrUzLiIxbyCoxVyle7Q+bqgZ8SeeM8wzytsY+dVGcBxF6N4JS+zVk5eMcV385gG3Y6ON3EG112n6d+SMXY0OEBIcO6x+PnUSGHrSgpBgX7Ks1r7xqFa7heJLLt2wWwkARptX7udSq05paBhcpB0pHtA1Rfz3K2B+ZVIpSDfki9UVKzT8JUmwW6NNzSgxUfQHGwnW7kj4jp4AT0VZk3ADw497M2G/12N0PPB5CnhHf7ovgy6nL1ikrygTKRFmNZISvAcywB9GVqNAVE+ZHDSCuURNsAInVzgYo9xgJDW8wUw2o8U77+xiFxgI5QSZX3Iq7YLMgeksaO4rBJEa54k8m5wEiEE1nUhLuJ0X/vh2xPff6SQ1BL/zkOhvJCACK6Vb15mDOeCSq54Cr7kvS46itMosi/uS66+PujOO+xt/2FWYepz6ZlN70bRly57Q06J+ZJoc9FfBCbCyYH7U/ASsmY095ywPsBo1XQ9PqhnN1/YOorJ068foQDNVpm146mUpILVxmq41Cj55YKHEazXGsdBIbXWhcrRf4G2fJLRcGUr9q8/lERo9oxRm5JFX6TCmj6kmiFqv+Ow9gI0x8GvaQ== username@hostname'
-#auth_ssh_call='echo "{}" >> ~/.ssh/authorized_keys'.format(ssh_key)
-#os.system(auth_ssh_call)
+    def setup_winrm():
+        file_loc = sp.check_output('powershell.exe $env:temp')
+        file_loc=file_loc.decode("utf-8").split()[0]
+
+        file = open(file_loc + '\\ansible_setup.ps1','w+')
+        file.write ( '''
+
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+        $url = "https://raw.githubusercontent.com/ansible/ansible/devel/examples/scripts/ConfigureRemotingForAnsible.ps1"
+        $file = "$env:temp\\ConfigureRemotingForAnsible.ps1"
+
+        (New-Object -TypeName System.Net.WebClient).DownloadFile($url, $file)
+
+        powershell.exe -ExecutionPolicy ByPass -File $file
+
+        ''')
+
+        file.close()
+
+        p = sp.Popen(['powershell.exe', file_loc + '\\ansible_setup.ps1'], stdout=sp.PIPE)
+        out, err = p.communicate()
+        print(out)
+        if err:
+            print(err)
+
+    def check_winrm():
+        output = sp.check_output('powershell.exe winrm enumerate winrm/config/Listener')
+        if len(output.decode("utf-8").split('Listener')) != 3:
+            return False
+        output = output.decode("utf-8").split('Listener')[2].split('\r\n    ')
+        winrm_listener = dict([i.split(' = ') for i in output[1:]])
+
+        return (winrm_listener['Enabled']== 'true' and winrm_listener['CertificateThumbprint'] and winrm_listener['ListeningOn'])
+
+    uuid = sp.check_output('wmic csproduct get uuid').decode().split('\n')[1].strip()
+    response = requests.get('https://api.plusclouds.com/v2/iaas/virtual-machines/meta-data?uuid={}'.format(uuid)) #requests the information of the instance
+    response = response.json()     # converting response object to dictionary
+
+    winrm_api_status = response['data']['winrm_enabled']
+    winrm_current_status = True if sp.check_output('powershell.exe Get-Service winrm').decode("utf-8").split()[6].lower()=="running" else False
+
+    if winrm_api_status != winrm_current_status:
+        if winrm_api_status:
+            p = sp.Popen('powershell.exe Start-Service winrm')
+            if not check_winrm():
+                setup_winrm()
+        else:
+            p = sp.Popen('powershell.exe Stop-Service winrm')
