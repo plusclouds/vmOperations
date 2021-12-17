@@ -95,10 +95,10 @@ if platform.system()=='Windows':
 
     uuid = sp.check_output('wmic bios get serialnumber').decode().split('\n')[1].strip()
     response = requests.get('https://api.plusclouds.com/v2/iaas/virtual-machines/meta-data?uuid={}'.format(uuid)) #requests the information of the instance
-    person_dict = response.json() #json to dict
-    password= person_dict['data']['password']
+    response = response.json() #json to dict
+    password= response['data']['password']
     hashed_password = sha256(''.encode()).hexdigest()
-    hostname = person_dict['data']['hostname']
+    hostname = response['data']['hostname']
 
     #Password
 
@@ -137,22 +137,18 @@ if platform.system()=='Windows':
         time.sleep(.3)
 
     #WinRM toggle
-    
+
     def setup_winrm():
         file_loc = sp.check_output('powershell.exe $env:temp')
         file_loc=file_loc.decode("utf-8").split()[0]
 
         file = open(file_loc + '\\ansible_setup.ps1','w+')
         file.write ( '''
-
         [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
         $url = "https://raw.githubusercontent.com/ansible/ansible/devel/examples/scripts/ConfigureRemotingForAnsible.ps1"
         $file = "$env:temp\\ConfigureRemotingForAnsible.ps1"
-
         (New-Object -TypeName System.Net.WebClient).DownloadFile($url, $file)
-
         powershell.exe -ExecutionPolicy ByPass -File $file
-
         ''')
 
         file.close()
@@ -173,8 +169,6 @@ if platform.system()=='Windows':
         return (winrm_listener['Enabled']== 'true' and winrm_listener['CertificateThumbprint'] and winrm_listener['ListeningOn'])
 
     uuid = sp.check_output('wmic bios get serialnumber ').decode().split('\n')[1].strip()
-    response = requests.get('https://api.plusclouds.com/v2/iaas/virtual-machines/meta-data?uuid={}'.format(uuid)) #requests the information of the instance
-    response = response.json()     # converting response object to dictionary
 
     winrm_api_status = False
     if 'winrm_enabled' in response['data']:
