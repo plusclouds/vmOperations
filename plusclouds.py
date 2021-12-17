@@ -137,7 +137,7 @@ if platform.system()=='Windows':
         time.sleep(.3)
 
     #WinRM toggle
-
+    
     def setup_winrm():
         file_loc = sp.check_output('powershell.exe $env:temp')
         file_loc=file_loc.decode("utf-8").split()[0]
@@ -163,7 +163,7 @@ if platform.system()=='Windows':
         if err:
             print(err)
 
-    def check_winrm():
+    def is_winrm_set():
         output = sp.check_output('powershell.exe winrm enumerate winrm/config/Listener')
         if len(output.decode("utf-8").split('Listener')) != 3:
             return False
@@ -172,17 +172,21 @@ if platform.system()=='Windows':
 
         return (winrm_listener['Enabled']== 'true' and winrm_listener['CertificateThumbprint'] and winrm_listener['ListeningOn'])
 
-    uuid = sp.check_output('wmic csproduct get uuid').decode().split('\n')[1].strip()
+    uuid = sp.check_output('wmic bios get serialnumber ').decode().split('\n')[1].strip()
     response = requests.get('https://api.plusclouds.com/v2/iaas/virtual-machines/meta-data?uuid={}'.format(uuid)) #requests the information of the instance
     response = response.json()     # converting response object to dictionary
 
-    winrm_api_status = response['data']['winrm_enabled']
-    winrm_current_status = True if sp.check_output('powershell.exe Get-Service winrm').decode("utf-8").split()[6].lower()=="running" else False
+    winrm_api_status = False
+    if 'winrm_enabled' in response['data']:
+        winrm_api_status = response['data']['winrm_enabled']
+    is_winrm_running = True if sp.check_output('powershell.exe Get-Service winrm').decode("utf-8").split()[6].lower()=="running" else False
 
-    if winrm_api_status != winrm_current_status:
-        if winrm_api_status:
+
+    if winrm_api_status:
+        if not is_winrm_running:
             p = sp.Popen('powershell.exe Start-Service winrm')
-            if not check_winrm():
-                setup_winrm()
-        else:
+        if not is_winrm_set():
+            setup_winrm()
+    else:
+        if is_winrm_running:
             p = sp.Popen('powershell.exe Stop-Service winrm')
