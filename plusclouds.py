@@ -125,6 +125,7 @@ if platform.system()=='Windows':
     #Hostname
 
     current_hostname=sp.check_output('hostname').decode().split('\n')[0].strip()
+    hostname = hostname if len(hostname) <=15 else hostname[0:15]
     if hostname != current_hostname:
         sp.call(["powershell","Rename-Computer -NewName "+ hostname], shell = True)
 
