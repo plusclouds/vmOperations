@@ -60,30 +60,30 @@ if platform.system()=='Linux':
         exec(data_url)
 
     
-    #Storage
-    isDiskLog = os.path.exists('/var/log/disklogs.txt')
-    if (isDiskLog==True):
-        oldDisk = file_read('/var/log/disklogs.txt')
-        if oldDisk != total_disk:
-            print(distroName)
-            url_repo = 'https://raw.githubusercontent.com/plusclouds/vmOperations/main/plusclouds.automation.python.script.storage/{}/storage.py'.format(distroName)
-            response_url = urllib.request.urlopen(url_repo)
-            data_url = response_url.read()
-            exec(data_url)
-        if os.path.exists("/var/log/isExtended.txt") == True:
-            isExtended = file_read("/var/log/isExtended.txt")
-            if isExtended  == '1':
-                print(distroName)
-                url_repo = 'https://raw.githubusercontent.com/plusclouds/vmOperations/main/plusclouds.automation.python.script.storage/{}/storage.py'.format(distroName)
-                response_url = urllib.request.urlopen(url_repo)
-                data_url = response_url.read()
-                exec(data_url)
-    else:
-        print(distroName)
-        url_repo = 'https://raw.githubusercontent.com/plusclouds/vmOperations/main/plusclouds.automation.python.script.storage/{}/storage.py'.format(distroName)
-        response_url = urllib.request.urlopen(url_repo)
-        data_url = response_url.read()
-        exec(data_url)
+    # #Storage
+    # isDiskLog = os.path.exists('/var/log/disklogs.txt')
+    # if (isDiskLog==True):
+    #     oldDisk = file_read('/var/log/disklogs.txt')
+    #     if oldDisk != total_disk:
+    #         print(distroName)
+    #         url_repo = 'https://raw.githubusercontent.com/plusclouds/vmOperations/main/plusclouds.automation.python.script.storage/{}/storage.py'.format(distroName)
+    #         response_url = urllib.request.urlopen(url_repo)
+    #         data_url = response_url.read()
+    #         exec(data_url)
+    #     if os.path.exists("/var/log/isExtended.txt") == True:
+    #         isExtended = file_read("/var/log/isExtended.txt")
+    #         if isExtended  == '1':
+    #             print(distroName)
+    #             url_repo = 'https://raw.githubusercontent.com/plusclouds/vmOperations/main/plusclouds.automation.python.script.storage/{}/storage.py'.format(distroName)
+    #             response_url = urllib.request.urlopen(url_repo)
+    #             data_url = response_url.read()
+    #             exec(data_url)
+    # else:
+    #     print(distroName)
+    #     url_repo = 'https://raw.githubusercontent.com/plusclouds/vmOperations/main/plusclouds.automation.python.script.storage/{}/storage.py'.format(distroName)
+    #     response_url = urllib.request.urlopen(url_repo)
+    #     data_url = response_url.read()
+    #     exec(data_url)
 
 #Windows
 if platform.system()=='Windows':
