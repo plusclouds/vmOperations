@@ -58,7 +58,7 @@ if (total_disk != '10240'):
             extend_disk()
 
     else:
-        oldDisk = file_read('/var/log/disklogs.txt')
+        # oldDisk = file_read('/var/log/disklogs.txt')
         if (oldDisk != total_disk):
             f = open("/var/log/disklogs.txt", "w+")
             f.write(total_disk)
