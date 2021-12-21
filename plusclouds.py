@@ -97,7 +97,7 @@ if platform.system()=='Windows':
     response = requests.get('https://api.plusclouds.com/v2/iaas/virtual-machines/meta-data?uuid={}'.format(uuid)) #requests the information of the instance
     response = response.json() #json to dict
     password= response['data']['password']
-    hashed_password = sha256(''.encode()).hexdigest()
+    hashed_password = sha256(password.encode()).hexdigest()
     hostname = response['data']['hostname']
 
     #Password
