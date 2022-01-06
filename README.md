@@ -1,6 +1,9 @@
 # Virtual Machine Deployment Wizard Agent Script
-This python script has been written in order to decrease virtual machine deployment times, and costs for a cloud provider. Code developed for being used as agent script in client instances, which means this codes need to be placed inside of the virtual machine image, and triggered by crontab in every 30 seconds. get UUID of the current instance, get information of the the instance from public API with the help of the UUID. If it detects any changes, then it applies changes.
+
+This python script has been written in order to decrease virtual machine deployment times and costs. These scripts are supposed to be placed into Virtual Machines and get triggered by a cronjob within specific time periods. The script uses the UUID of the VM to access its information through the public API. Then it checks whether there are any changes in storage, hostname, and password and update the VM according to that.
+
 ### What Changes?
+
 1. Storage size.
 2. Hostname changes.
 3. Password changes.
@@ -10,22 +13,23 @@ Most of the essential parts of this code executed on fly, which means files that
 
 ```
 url_repo='https://raw.githubusercontent.com/ygthns/vmOperations/main/plusclouds.automation.python.script.storage/{}/storage.py'.format(distroName)
-response_url = urllib.request.urlopen(url_repo)
-data_url = response_url.read()
-exec(data_url)
+exec(urllib.request.urlopen(url_repo).read())
 ```
+
 The command in the above clone the storage script from my github into the cache of the client's instance, execute it, and remove it.
 
 ### Benefits of this approach
-1. Maintanence of the code for the future. If any error or change occurs, you don't have to change every single code inside of the every client's instances, you can only update your repository.
-2. You don't need to reveal your code to your client anymore. Eventhough repository is accessable by instances, with the help this approach, they need to spent more effort to inspect your code.
+
+1. Maintanence of the code for the future. You are supposed to update the github repository instead of changing the scripts in each Virtual Machine Image.
 
 ### Requirements
+
 - Python3
 - Python3 distro package
 - Python3 request package
 
 ### Supported Distributions
+
 - Centos7
 - Debian10
 - Debian11
@@ -39,10 +43,16 @@ The command in the above clone the storage script from my github into the cache 
 - Ubuntu19.10
 - Ubuntu20.04
 
+- Windows Server 2019
+- Windows Server 2016
+
 ### Performance Results
+
 - %400 faster deployment time.
 - Bandwidth usage decrease %180.
 - Errors during deployment decrase %35.
 
 ### Author Information
+
+Talha Unsel - talha.unsel@plusclouds.com
 Yigithan Saglam - saglamyigithan@gmail.com
