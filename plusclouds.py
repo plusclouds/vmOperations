@@ -34,17 +34,14 @@ if platform.system()=='Linux':
 
     #Password
     fileFlag = os.path.exists('/var/log/passwordlogs.txt')
+    url_repo = 'https://raw.githubusercontent.com/plusclouds/vmOperations/main/plusclouds.automation.python.script.password/{}/password.py'.format(distroName)
     if (fileFlag == True):
         oldPassword = file_read('/var/log/passwordlogs.txt')
         if (oldPassword != password):
-            print(distroName)
-            url_repo = 'https://raw.githubusercontent.com/plusclouds/vmOperations/main/plusclouds.automation.python.script.password/{}/password.py'.format(distroName)
             response_url = urllib.request.urlopen(url_repo)
             data_url = response_url.read()
             exec(data_url)
     else:
-        print(distroName)
-        url_repo = 'https://raw.githubusercontent.com/plusclouds/vmOperations/main/plusclouds.automation.python.script.password/{}/password.py'.format(distroName)
         response_url = urllib.request.urlopen(url_repo)
         data_url = response_url.read()
         exec(data_url)
@@ -53,7 +50,6 @@ if platform.system()=='Linux':
     #Hostname
     oldHostname = file_read('/etc/hostname')
     if oldHostname != hostname:
-        print(distroName)
         url_repo = 'https://raw.githubusercontent.com/plusclouds/vmOperations/main/plusclouds.automation.python.script.hostname/{}/hostname.py'.format(distroName)
         response_url = urllib.request.urlopen(url_repo)
         data_url = response_url.read()
@@ -62,25 +58,20 @@ if platform.system()=='Linux':
     
     #Storage
     isDiskLog = os.path.exists('/var/log/disklogs.txt')
+    url_repo = 'https://raw.githubusercontent.com/plusclouds/vmOperations/main/plusclouds.automation.python.script.storage/{}/storage.py'.format(distroName)
     if (isDiskLog==True):
         oldDisk = file_read('/var/log/disklogs.txt')
-        if oldDisk != total_disk:
-            print(distroName)
-            url_repo = 'https://raw.githubusercontent.com/plusclouds/vmOperations/main/plusclouds.automation.python.script.storage/{}/storage.py'.format(distroName)
+        if oldDisk != total_disk: 
             response_url = urllib.request.urlopen(url_repo)
             data_url = response_url.read()
             exec(data_url)
         if os.path.exists("/var/log/isExtended.txt") == True:
             isExtended = file_read("/var/log/isExtended.txt")
             if isExtended  == '1':
-                print(distroName)
-                url_repo = 'https://raw.githubusercontent.com/plusclouds/vmOperations/main/plusclouds.automation.python.script.storage/{}/storage.py'.format(distroName)
                 response_url = urllib.request.urlopen(url_repo)
                 data_url = response_url.read()
                 exec(data_url)
     else:
-        print(distroName)
-        url_repo = 'https://raw.githubusercontent.com/plusclouds/vmOperations/main/plusclouds.automation.python.script.storage/{}/storage.py'.format(distroName)
         response_url = urllib.request.urlopen(url_repo)
         data_url = response_url.read()
         exec(data_url)
@@ -108,7 +99,7 @@ if platform.system()=='Windows':
         oldPassword = file_read('C:\Windows\System32\winevt\Logs\passwordlog.txt')
         if (oldPassword != hashed_password):
             isChanged= True
-            print('Password has been changed in while ago')
+            print('Password has been changed since last execution')
             f = open("C:\Windows\System32\winevt\Logs\passwordlog.txt", "w+")
             f.write(password)
             f.close()
