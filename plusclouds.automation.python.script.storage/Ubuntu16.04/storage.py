@@ -10,13 +10,7 @@ import fnmatch
 #This function takes filename as input, and then read it and return as a string variable
 def file_read(fname):
         with open (fname, "r") as myfile:
-                data = myfile.readlines()
-                #empty string created in order to make list variable str.
-                str1 = ""  
-                # traverse in the string  
-                for ele in data: 
-                    str1 += ele  
-                return str1
+            return myfile.readline().rstrip()  # read the password from file
 
 def extend_disk():
     try:

@@ -10,13 +10,7 @@ import urllib.request
 #This function takes filename as input, and then read it and return as a string variable
 def file_read(fname):
         with open (fname, "r") as myfile:
-                data = myfile.readlines()
-                #empty string created in order to make list variable str.
-                str1 = ""  
-                # traverse in the string  
-                for ele in data: 
-                    str1 += ele  
-                return str1
+            return myfile.readline().rstrip()  # read the password from file
 
 def execute_script(url):
     exec(urllib.request.urlopen(url).read())
@@ -70,11 +64,6 @@ if platform.system()=='Linux':
 #Windows
 if platform.system()=='Windows':
     distroName = str(platform.system()) + '_' + str(platform.release())
-
-    def file_read(fname):
-        with open (fname, "r") as myfile:
-            return myfile.readline().rstrip()  # read the password from file
-
     uuid = sp.check_output('wmic bios get serialnumber').decode().split('\n')[1].strip()
     response = requests.get('https://api.plusclouds.com/v2/iaas/virtual-machines/meta-data?uuid={}'.format(uuid)) #requests the information of the instance
     response = response.json() #json to dict
