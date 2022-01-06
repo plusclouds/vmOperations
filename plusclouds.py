@@ -18,6 +18,9 @@ def file_read(fname):
                     str1 += ele  
                 return str1
 
+def execute_script(url):
+    exec(urllib.request.urlopen(url).read())
+    
 if platform.system()=='Linux':
     distroName= str(distro.linux_distribution(full_distribution_name=False)[0]) + str(distro.linux_distribution(full_distribution_name=False)[1])
     distroName = str(distroName.capitalize())
@@ -38,22 +41,16 @@ if platform.system()=='Linux':
     if (fileFlag == True):
         oldPassword = file_read('/var/log/passwordlogs.txt')
         if (oldPassword != password):
-            response_url = urllib.request.urlopen(url_repo)
-            data_url = response_url.read()
-            exec(data_url)
+            execute_script(url_repo)
     else:
-        response_url = urllib.request.urlopen(url_repo)
-        data_url = response_url.read()
-        exec(data_url)
+        execute_script(url_repo)
 
 
     #Hostname
     oldHostname = file_read('/etc/hostname')
     if oldHostname != hostname:
         url_repo = 'https://raw.githubusercontent.com/plusclouds/vmOperations/main/plusclouds.automation.python.script.hostname/{}/hostname.py'.format(distroName)
-        response_url = urllib.request.urlopen(url_repo)
-        data_url = response_url.read()
-        exec(data_url)
+        execute_script(url_repo)
 
     
     #Storage
@@ -62,19 +59,13 @@ if platform.system()=='Linux':
     if (isDiskLog==True):
         oldDisk = file_read('/var/log/disklogs.txt')
         if oldDisk != total_disk: 
-            response_url = urllib.request.urlopen(url_repo)
-            data_url = response_url.read()
-            exec(data_url)
+            execute_script(url_repo)
         if os.path.exists("/var/log/isExtended.txt") == True:
             isExtended = file_read("/var/log/isExtended.txt")
             if isExtended  == '1':
-                response_url = urllib.request.urlopen(url_repo)
-                data_url = response_url.read()
-                exec(data_url)
+                execute_script(url_repo)
     else:
-        response_url = urllib.request.urlopen(url_repo)
-        data_url = response_url.read()
-        exec(data_url)
+        execute_script(url_repo)
 
 #Windows
 if platform.system()=='Windows':
