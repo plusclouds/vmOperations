@@ -6,11 +6,11 @@ import shutil
 import fnmatch
 
 
-
-#This function takes filename as input, and then read it and return as a string variable
+# This function takes filename as input, and then read it and return as a string variable
 def file_read(fname):
-        with open (fname, "r") as myfile:
-            return myfile.readline().rstrip()  # read the password from file
+    with open(fname, "r") as myfile:
+        return myfile.readline().rstrip()  # read the password from file
+
 
 def extend_disk():
     cmd = "bash -c \"echo -e 'd\n\nn\n\n\n\n\nN\nw\n' | sudo fdisk /dev/xvda\""
@@ -21,22 +21,25 @@ def extend_disk():
     print("System will be rebooted.")
     os.system('sudo reboot')
 
+
 xvdaCount = len(fnmatch.filter(os.listdir('/dev'), 'xvda*'))
-xvdaCount=str(xvdaCount-1)
-resizeCall='sudo xfs_growfs /'
+xvdaCount = str(xvdaCount-1)
+resizeCall = 'sudo xfs_growfs /'
 total, used, free = shutil.disk_usage("/")
-uuid = sp.getoutput('/usr/sbin/dmidecode -s system-uuid') #uuid of the vm assigned to uuid variable
+# uuid of the vm assigned to uuid variable
+uuid = sp.getoutput('/usr/sbin/dmidecode -s system-uuid')
 try:
-    response = requests.get('https://api.plusclouds.com/v2/iaas/virtual-machines/meta-data?uuid={}'.format(uuid),timeout=5)
-except requests.exceptions.RequestException as e:  
+    response = requests.get(
+        'https://api.plusclouds.com/v2/iaas/virtual-machines/meta-data?uuid={}'.format(uuid), timeout=5)
+except requests.exceptions.RequestException as e:
     raise SystemExit(e)
-person_dict = response.json() #json to dict
-total_disk= person_dict['data']['virtualDisks']['data'][0]['total_disk']
-total_disk=str(total_disk)
-oldDisk='0'
+person_dict = response.json()  # json to dict
+total_disk = person_dict['data']['virtualDisks']['data'][0]['total_disk']
+total_disk = str(total_disk)
+oldDisk = '0'
 
 isDiskLog = os.path.exists('/var/log/disklogs.txt')
-if (isDiskLog==True):
+if (isDiskLog == True):
     oldDisk = file_read('/var/log/disklogs.txt')
     f = open("/var/log/disklogs.txt", "w+")
     f.write(total_disk)
@@ -49,7 +52,7 @@ else:
 isExtended = os.path.exists('/var/log/isExtended.txt')
 if (total_disk != '10240'):
     if (isExtended == False):
-            extend_disk()
+        extend_disk()
 
     else:
         if (oldDisk != total_disk):
