@@ -4,17 +4,42 @@ import os
 import subprocess as sp
 import shutil
 import fnmatch
-
+import distro
 
 # This function takes filename as input, and then read it and return as a string variable
+
+
 def file_read(fname):
     with open(fname, "r") as myfile:
         return myfile.readline().rstrip()  # read the password from file
 
 
+distroName = str(distro.linux_distribution(full_distribution_name=False)[
+    0]) + str(distro.linux_distribution(full_distribution_name=False)[1])
+
+
 def extend_disk():
-    cmd = "bash -c \"echo -e 'd\n\nn\n\n\n\nN\nw\n' | sudo fdisk /dev/xvda\""
-    sp.check_call(cmd, shell=True)
+    try:
+        if distroName in ['centos7', 'centos8', 'debian17.5', 'pardus19.0', 'ubuntu16.04']:
+            cmd = "bash -c \"echo -e 'd\n\nn\n\n\n\n\nw\n' | sudo fdisk /dev/xvda\""
+
+        if distroName in ['debian9', 'debian10', 'debian11', 'fedora30']:
+            cmd = "bash -c \"echo -e 'd\n\nn\n\n\n\n\nN\nw\n' | sudo fdisk /dev/xvda\""
+
+        if distroName in ['ubuntu19.04', 'ubuntu19.10', 'ubuntu20.04']:
+            cmd = "bash -c \"echo -e 'd\n\nn\n\n\n\nN\nw\n' | sudo fdisk /dev/xvda\""
+            cmd = "bash -c \"echo -e 'd\n\nn\n\n\n\nN\nw\n' | sudo fdisk /dev/xvda\""
+
+        if distroName in ['ubuntu18.04']:
+            xvdaCount = len(fnmatch.filter(os.listdir('/dev'), 'xvda*'))
+            gdisk_command = "bash -c \"echo -e 'd\n{}\nn\n\n\n\n\nw\nY\nY\n' | sudo gdisk /dev/xvda\"".format(
+                str(xvdaCount-1))
+            sp.check_call(gdisk_command, shell=True)
+            cmd = "bash -c \"echo -e 'd\n\nn\n\n\n\nN\nw\n' | sudo fdisk /dev/xvda\""
+        sp.check_call(cmd, shell=True)
+
+    except Exception:
+        pass
     file = open("/var/log/isExtended.txt", "w+")
     file.write('1')
     file.close()
@@ -24,13 +49,17 @@ def extend_disk():
 
 xvdaCount = len(fnmatch.filter(os.listdir('/dev'), 'xvda*'))
 xvdaCount = str(xvdaCount-1)
-resizeCall = 'sudo resize2fs /dev/xvda{}'.format(xvdaCount)
+
+if distroName in ['centos7', 'centos8', 'fedora30']:
+    resizeCall = 'sudo xfs_growfs /dev/xvda{}'.format(xvdaCount)
+else:
+    resizeCall = 'sudo resize2fs /dev/xvda{}'.format(xvdaCount)
 total, used, free = shutil.disk_usage("/")
-# uuid of the vm assigned to uuid variable,
+# uuid of the vm assigned to uuid variable
 uuid = sp.getoutput('/usr/sbin/dmidecode -s system-uuid')
 try:
     response = requests.get(
-        'https://api.plusclouds.com/v2/iaas/virtual-machines/meta-data?uuid={}'.format(uuid), timeout=5)
+        'https://api.plusclouds.com/v2/iaas/virtual-machines/meta-data?uuid={}'.format(uuid), timeout=3)
 except requests.exceptions.RequestException as e:
     raise SystemExit(e)
 person_dict = response.json()  # json to dict
@@ -55,7 +84,6 @@ if (total_disk != '10240'):
         extend_disk()
 
     else:
-        # oldDisk = file_read('/var/log/disklogs.txt')
         if (oldDisk != total_disk):
             f = open("/var/log/disklogs.txt", "w+")
             f.write(total_disk)

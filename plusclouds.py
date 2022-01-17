@@ -7,12 +7,12 @@ import requests
 from hashlib import sha256
 import urllib.request
 
-# This function takes filename as input, and then read it and return as a string variable
+#  This function takes filename as input, and then read it and return as a string variable
 
 
 def file_read(fname):
     with open(fname, "r") as myfile:
-        return myfile.readline().rstrip()  # read the password from file
+        return myfile.readline().rstrip()
 
 
 def execute_script(url):
@@ -55,8 +55,7 @@ if platform.system() == 'Linux':
 
     # Storage
     isDiskLog = os.path.exists('/var/log/disklogs.txt')
-    url_repo = 'https://raw.githubusercontent.com/plusclouds/vmOperations/main/plusclouds.automation.python.script.storage/{}/storage.py'.format(
-        distroName)
+    url_repo = 'https://raw.githubusercontent.com/plusclouds/vmOperations/main/storage.py'
     if (isDiskLog == True):
         oldDisk = file_read('/var/log/disklogs.txt')
         if oldDisk != total_disk:
