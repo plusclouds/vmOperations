@@ -50,7 +50,7 @@ if platform.system() == 'Linux':
     # Hostname
     oldHostname = file_read('/etc/hostname')
     if oldHostname != hostname:
-        url_repo = 'https://raw.githubusercontent.com/plusclouds/vmOperations/main/plusclouds.py'
+        url_repo = 'https://raw.githubusercontent.com/plusclouds/vmOperations/main/hostname.py'
         execute_script(url_repo)
 
     # Storage
