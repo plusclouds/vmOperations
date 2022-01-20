@@ -20,6 +20,13 @@ distroName = str(distro.linux_distribution(full_distribution_name=False)[
 
 def extend_disk():
     try:
+        if distroName in ['ubuntu18.04']:
+            xvdaCount = len(fnmatch.filter(os.listdir('/dev'), 'xvda*'))
+            gdisk_command = "bash -c \"echo -e 'd\n{}\nn\n\n\n\n\nw\nY\nY\n' | sudo gdisk /dev/xvda\"".format(
+                str(xvdaCount-1))
+            sp.check_call(gdisk_command, shell=True)
+            cmd = "bash -c \"echo -e 'd\n\nn\n\n\n\nN\nw\n' | sudo fdisk /dev/xvda\""
+
         if distroName in ['centos7', 'centos8', 'debian17.5', 'pardus19.0', 'ubuntu16.04']:
             cmd = "bash -c \"echo -e 'd\n\nn\n\n\n\n\nw\n' | sudo fdisk /dev/xvda\""
 
@@ -30,12 +37,6 @@ def extend_disk():
             cmd = "bash -c \"echo -e 'd\n\nn\n\n\n\nN\nw\n' | sudo fdisk /dev/xvda\""
             cmd = "bash -c \"echo -e 'd\n\nn\n\n\n\nN\nw\n' | sudo fdisk /dev/xvda\""
 
-        if distroName in ['ubuntu18.04']:
-            xvdaCount = len(fnmatch.filter(os.listdir('/dev'), 'xvda*'))
-            gdisk_command = "bash -c \"echo -e 'd\n{}\nn\n\n\n\n\nw\nY\nY\n' | sudo gdisk /dev/xvda\"".format(
-                str(xvdaCount-1))
-            sp.check_call(gdisk_command, shell=True)
-            cmd = "bash -c \"echo -e 'd\n\nn\n\n\n\nN\nw\n' | sudo fdisk /dev/xvda\""
         sp.check_call(cmd, shell=True)
 
     except Exception:
