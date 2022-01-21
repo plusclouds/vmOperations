@@ -75,16 +75,10 @@ response_dict = response.json()  # json to dict
 total_disk = str(response_dict['data']
                  ['virtualDisks']['data'][0]['total_disk'])
 
-oldDisk = '0'
+oldDisk = '0' if not file_exists(
+    '/var/log/disklogs.txt') else file_read('/var/log/disklogs.txt')
 
-isDiskLog = os.path.exists('/var/log/disklogs.txt')
-if (isDiskLog == True):
-    oldDisk = file_read('/var/log/disklogs.txt')
-    f = open("/var/log/disklogs.txt", "w+")
-    f.write(total_disk)
-    f.close()
-else:
-    file_write("/var/log/disklogs.txt", total_disk)
+file_write("/var/log/disklogs.txt", total_disk)
 
 if (total_disk != '10240'):
     if (not file_exists('/var/log/isExtended.txt')) or (oldDisk != total_disk):
