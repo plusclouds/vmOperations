@@ -2,7 +2,6 @@ import requests
 import json
 import os
 import subprocess as sp
-import shutil
 import fnmatch
 import distro
 
@@ -12,6 +11,16 @@ import distro
 def file_read(fname):
     with open(fname, "r") as myfile:
         return myfile.readline().rstrip()  # read the password from file
+
+
+def file_write(fname, data):
+    file = open(fname, "w+")
+    file.write(data)
+    file.close()
+
+
+def file_exists(fname):
+    return os.path.exists(fname)
 
 
 distroName = str(distro.linux_distribution(full_distribution_name=False)[
@@ -41,21 +50,20 @@ def extend_disk():
 
     except Exception:
         pass
-    file = open("/var/log/isExtended.txt", "w+")
-    file.write('1')
-    file.close()
+
+    file_write("/var/log/isExtended.txt", "1")
     print("System will be rebooted.")
     os.system('sudo reboot')
 
 
-xvdaCount = len(fnmatch.filter(os.listdir('/dev'), 'xvda*'))
-xvdaCount = str(xvdaCount-1)
+xvdaCount = str(len(fnmatch.filter(os.listdir('/dev'), 'xvda*')) - 1)
+
 
 if distroName in ['centos7', 'centos8', 'fedora30']:
     resizeCall = 'sudo xfs_growfs /dev/xvda{}'.format(xvdaCount)
 else:
     resizeCall = 'sudo resize2fs /dev/xvda{}'.format(xvdaCount)
-total, used, free = shutil.disk_usage("/")
+
 # uuid of the vm assigned to uuid variable
 uuid = sp.getoutput('/usr/sbin/dmidecode -s system-uuid')
 try:
@@ -63,9 +71,10 @@ try:
         'https://api.plusclouds.com/v2/iaas/virtual-machines/meta-data?uuid={}'.format(uuid), timeout=3)
 except requests.exceptions.RequestException as e:
     raise SystemExit(e)
-person_dict = response.json()  # json to dict
-total_disk = person_dict['data']['virtualDisks']['data'][0]['total_disk']
-total_disk = str(total_disk)
+response_dict = response.json()  # json to dict
+total_disk = str(response_dict['data']
+                 ['virtualDisks']['data'][0]['total_disk'])
+
 oldDisk = '0'
 
 isDiskLog = os.path.exists('/var/log/disklogs.txt')
@@ -75,30 +84,17 @@ if (isDiskLog == True):
     f.write(total_disk)
     f.close()
 else:
-    f = open("/var/log/disklogs.txt", "w+")
-    f.write(total_disk)
-    f.close()
+    file_write("/var/log/disklogs.txt", total_disk)
 
-isExtended = os.path.exists('/var/log/isExtended.txt')
 if (total_disk != '10240'):
-    if (isExtended == False):
+    if (not file_exists('/var/log/isExtended.txt')) or (oldDisk != total_disk):
         extend_disk()
 
-    else:
-        if (oldDisk != total_disk):
-            f = open("/var/log/disklogs.txt", "w+")
-            f.write(total_disk)
-            f.close()
-            extend_disk()
 else:
     print('No need for disk extend.')
-    file = open("/var/log/isExtended.txt", "w+")
-    file.write('0')
-    file.close()
+    file_write("/var/log/isExtended.txt", '0')
 
 isExtended = file_read("/var/log/isExtended.txt")
 if (isExtended == '1'):
     os.system(resizeCall)
-    file = open("/var/log/isExtended.txt", "w+")
-    file.write('0')
-    file.close()
+    file_write("/var/log/isExtended.txt", '0')
