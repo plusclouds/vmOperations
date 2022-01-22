@@ -23,11 +23,11 @@ def file_exists(fname):
     return os.path.exists(fname)
 
 
-distributionName = str(distro.linux_distribution(full_distribution_name=False)[
-    0]) + str(distro.linux_distribution(full_distribution_name=False)[1])
+distributionName = distro.id() + distro.version()
 
 
 def extend_disk():
+    global distributionName
     try:
         if distributionName in ['ubuntu18.04']:
             xvdaCount = len(fnmatch.filter(os.listdir('/dev'), 'xvda*'))
