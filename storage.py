@@ -23,26 +23,26 @@ def file_exists(fname):
     return os.path.exists(fname)
 
 
-distroName = str(distro.linux_distribution(full_distribution_name=False)[
+distributionName = str(distro.linux_distribution(full_distribution_name=False)[
     0]) + str(distro.linux_distribution(full_distribution_name=False)[1])
 
 
 def extend_disk():
     try:
-        if distroName in ['ubuntu18.04']:
+        if distributionName in ['ubuntu18.04']:
             xvdaCount = len(fnmatch.filter(os.listdir('/dev'), 'xvda*'))
             gdisk_command = "bash -c \"echo -e 'd\n{}\nn\n\n\n\n\nw\nY\nY\n' | sudo gdisk /dev/xvda\"".format(
                 str(xvdaCount-1))
             sp.check_call(gdisk_command, shell=True)
             cmd = "bash -c \"echo -e 'd\n\nn\n\n\n\nN\nw\n' | sudo fdisk /dev/xvda\""
 
-        if distroName in ['centos7', 'centos8', 'debian17.5', 'pardus19.0', 'ubuntu16.04']:
+        if distributionName in ['centos7', 'centos8', 'debian17.5', 'pardus19.0', 'ubuntu16.04']:
             cmd = "bash -c \"echo -e 'd\n\nn\n\n\n\n\nw\n' | sudo fdisk /dev/xvda\""
 
-        if distroName in ['debian9', 'debian10', 'debian11', 'fedora30']:
+        if distributionName in ['debian9', 'debian10', 'debian11', 'fedora30']:
             cmd = "bash -c \"echo -e 'd\n\nn\n\n\n\n\nN\nw\n' | sudo fdisk /dev/xvda\""
 
-        if distroName in ['ubuntu19.04', 'ubuntu19.10', 'ubuntu20.04']:
+        if distributionName in ['ubuntu19.04', 'ubuntu19.10', 'ubuntu20.04']:
             cmd = "bash -c \"echo -e 'd\n\nn\n\n\n\nN\nw\n' | sudo fdisk /dev/xvda\""
             cmd = "bash -c \"echo -e 'd\n\nn\n\n\n\nN\nw\n' | sudo fdisk /dev/xvda\""
 
@@ -61,7 +61,7 @@ def extend_disk():
 xvdaCount = str(len(fnmatch.filter(os.listdir('/dev'), 'xvda*')) - 1)
 
 
-if distroName in ['centos7', 'centos8', 'fedora30']:
+if distributionName in ['centos7', 'centos8', 'fedora30']:
     resizeCall = 'sudo xfs_growfs /dev/xvda{}'.format(xvdaCount)
 else:
     resizeCall = 'sudo resize2fs /dev/xvda{}'.format(xvdaCount)
