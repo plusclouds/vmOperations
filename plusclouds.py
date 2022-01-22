@@ -20,9 +20,6 @@ def execute_script(url):
 
 
 if platform.system() == 'Linux':
-    distroName = str(distro.linux_distribution(full_distribution_name=False)[
-                     0]) + str(distro.linux_distribution(full_distribution_name=False)[1])
-    distroName = str(distroName.capitalize())
     # uuid of the vm assigned to uuid variable
     uuid = sp.getoutput('/usr/sbin/dmidecode -s system-uuid')
     # requests the information of the instance
