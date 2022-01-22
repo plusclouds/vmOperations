@@ -51,7 +51,9 @@ def extend_disk():
     except Exception:
         pass
 
-    file_write("/var/log/isExtended.txt", "1")
+    file = open("/var/log/isExtended.txt", "w+")
+    file.write("1")
+    file.close()
     print("System will be rebooted.")
     os.system('sudo reboot')
 
