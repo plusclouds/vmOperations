@@ -40,6 +40,12 @@ def execute_script(url):
     exec(urllib.request.urlopen(url).read())
 
 
+def file_write(fname, data):
+    file = open(fname, "w+")
+    file.write(data)
+    file.close()
+
+
 def file_exists(fname):
     return os.path.exists(fname)
 
@@ -58,18 +64,27 @@ if platform.system() == 'Linux':
 
     # Password
     app_log.info(" ------  Password Check  ------")
-    fileFlag = os.path.exists('/var/log/passwordlogs.txt')
-    url_repo = 'https://raw.githubusercontent.com/plusclouds/vmOperations/main/password.py'
-    if (fileFlag == True):
+    if (file_exists('/var/log/passwordlogs.txt')):
         oldPassword = file_read('/var/log/passwordlogs.txt')
         if (oldPassword != password):
-            app_log.info("Password is changed from API. Executing password.py")
-            execute_script(url_repo)
+            app_log.info(
+                'Password in API is different. Setting isChanged variable to True')
+            isChanged = True
+            file_write("/var/log/passwordlogs.txt", password)
         else:
             app_log.info("Password is not changed in API.")
     else:
-        app_log.info("Password log file doesn't exist. Executing password.py")
-        execute_script(url_repo)
+        app_log.info(
+            "Password log file doesn't exist. Setting isChanged variable to True")
+        isChanged = True
+        file_write("/var/log/passwordlogs.txt", password)
+    if (isChanged == True):
+        app_log.info(
+            'isChanged variable is set to True. Executing password change call')
+        cmd = "bash -c \"echo -e '{}\\n{}' | passwd root\"".format(
+            readablePassword, readablePassword)
+        sp.check_call(cmd, shell=True)
+        app_log.info('Password has been updated successfully')
 
     # Hostname
     app_log.info(" ------  Hostname Check  ------")
