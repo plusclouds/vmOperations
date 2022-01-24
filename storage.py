@@ -48,22 +48,28 @@ def extend_disk():
 
         sp.check_call(cmd, shell=True)
 
-    except Exception:
+    except Exception as e:
+        app_log.info(e)
         pass
 
     file = open("/var/log/isExtended.txt", "w+")
     file.write("1")
     file.close()
-    print("System will be rebooted.")
+    app_log.info('Rebooting system due to extend_disk operation')
     os.system('sudo reboot')
 
 
+app_log.info('isExtended = ' + file_read('/var/log/isExtended.txt') +
+             ' || disklogs = ' + file_read('/var/log/disklogs.txt'))
 xvdaCount = str(len(fnmatch.filter(os.listdir('/dev'), 'xvda*')) - 1)
 
 
 if distributionName in ['centos7', 'centos8', 'fedora30']:
+    app_log.info(
+        'Declaring resizecall variable to that in centos7-8, or fedora30')
     resizeCall = 'sudo xfs_growfs /dev/xvda{}'.format(xvdaCount)
 else:
+    app_log.info('Declaring resizecall for other OSes')
     resizeCall = 'sudo resize2fs /dev/xvda{}'.format(xvdaCount)
 
 # uuid of the vm assigned to uuid variable
@@ -72,6 +78,7 @@ try:
     response = requests.get(
         'https://api.plusclouds.com/v2/iaas/virtual-machines/meta-data?uuid={}'.format(uuid), timeout=3)
 except requests.exceptions.RequestException as e:
+    app_log.error(e)
     raise SystemExit(e)
 response_dict = response.json()  # json to dict
 total_disk = str(response_dict['data']
@@ -84,13 +91,16 @@ file_write("/var/log/disklogs.txt", total_disk)
 
 if (total_disk != '10240'):
     if (not file_exists('/var/log/isExtended.txt')) or (oldDisk != total_disk):
+        app_log.info(
+            'Calling extend_disk function due either to inequalit of oldDisk and total_disk or non-existence of isExtended.txt file')
         extend_disk()
 
 else:
-    print('No need for disk extend.')
+    app_log.info('No need to extend disk because total_disk is 10240')
     file_write("/var/log/isExtended.txt", '0')
 
 isExtended = file_read("/var/log/isExtended.txt")
 if (isExtended == '1'):
+    app_log.info('Resizing the disk since isExtended is 1')
     os.system(resizeCall)
     file_write("/var/log/isExtended.txt", '0')

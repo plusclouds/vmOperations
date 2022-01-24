@@ -6,8 +6,29 @@ import subprocess as sp
 import requests
 from hashlib import sha256
 import urllib.request
+import logging
+from logging.handlers import RotatingFileHandler
 
 #  This function takes filename as input, and then read it and return as a string variable
+
+log_formatter = logging.Formatter(
+    '%(levelname)s (%(lineno)d) ==> %(message)s')
+
+logFile = '/var/log/plusclouds.log' if platform.system(
+) == 'Linux' else 'C:\Windows\System32\winevt\Logs\plusclouds.log'
+
+log_handler = RotatingFileHandler(
+    logFile, mode='a', maxBytes=2*1024*1024, backupCount=1, encoding=None, delay=0)
+log_handler.setFormatter(log_formatter)
+log_handler.setLevel(logging.INFO)
+
+app_log = logging.getLogger('root')
+app_log.setLevel(logging.INFO)
+
+app_log.addHandler(log_handler)
+
+app_log.info("============== Start of Execution at {}  =============".format(
+    time.asctime()))
 
 
 def file_read(fname):
@@ -19,49 +40,61 @@ def execute_script(url):
     exec(urllib.request.urlopen(url).read())
 
 
+def file_exists(fname):
+    return os.path.exists(fname)
+
+
 if platform.system() == 'Linux':
     # uuid of the vm assigned to uuid variable
     uuid = sp.getoutput('/usr/sbin/dmidecode -s system-uuid')
     # requests the information of the instance
     response = requests.get(
-        'https://api.plusclouds.com/v2/iaas/virtual-machines/meta-data?uuid={}'.format(uuid))
-    person_dict = response.json()  # json to dict
+        'https://api.plusclouds.com/v2/iaas/virtual-machines/meta-data?uuid={}'.format(uuid)).json()
     oldDisk = '0'
-    total_disk = person_dict['data']['virtualDisks']['data'][0]['total_disk']
-    total_disk = str(total_disk)
-    hostname = person_dict['data']['hostname']
-    password = person_dict['data']['password']
-    readablePassword = password
+    total_disk = str(response['data']['virtualDisks']['data'][0]['total_disk'])
+    hostname = response['data']['hostname']
+    readablePassword = response['data']['password']
     password = sha256(readablePassword.encode()).hexdigest()
 
     # Password
+    app_log.info(" ------  Password Check  ------")
     fileFlag = os.path.exists('/var/log/passwordlogs.txt')
     url_repo = 'https://raw.githubusercontent.com/plusclouds/vmOperations/main/password.py'
     if (fileFlag == True):
         oldPassword = file_read('/var/log/passwordlogs.txt')
         if (oldPassword != password):
+            app_log.info("Password is changed from API. Executing password.py")
             execute_script(url_repo)
+        else:
+            app_log.info("Password is not changed in API.")
     else:
+        app_log.info("Password log file doesn't exist. Executing password.py")
         execute_script(url_repo)
 
     # Hostname
+    app_log.info(" ------  Hostname Check  ------")
     oldHostname = file_read('/etc/hostname')
     if oldHostname != hostname:
-        url_repo = 'https://raw.githubusercontent.com/plusclouds/vmOperations/main/hostname.py'
-        execute_script(url_repo)
+        app_log.info('Hostname is different in API. Changing hostname in VM.')
+        os.system('hostnamectl set-hostname {}'.format(hostname))
 
     # Storage
+    app_log.info(" ------  Storage Check  ------")
     isDiskLog = os.path.exists('/var/log/disklogs.txt')
     url_repo = 'https://raw.githubusercontent.com/plusclouds/vmOperations/main/storage.py'
     if (isDiskLog == True):
         oldDisk = file_read('/var/log/disklogs.txt')
         if oldDisk != total_disk:
+            app_log.info("Disk is changed from API. Executing storage.py")
             execute_script(url_repo)
         if os.path.exists("/var/log/isExtended.txt") == True:
             isExtended = file_read("/var/log/isExtended.txt")
             if isExtended == '1':
+                app_log.info(
+                    "Disk is extended before reboot. Executing storage.py to resize")
                 execute_script(url_repo)
     else:
+        app_log.info("Storage log file doesn't exist. Executing storage.py")
         execute_script(url_repo)
 
 # Windows
@@ -169,3 +202,6 @@ if platform.system() == 'Windows':
     else:
         if is_winrm_running:
             p = sp.Popen('powershell.exe Stop-Service winrm')
+
+app_log.info("============== End of Execution at {}  =============".format(
+    time.asctime()))
