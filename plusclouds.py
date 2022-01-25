@@ -64,6 +64,7 @@ if platform.system() == 'Linux':
 
     # Password
     app_log.info(" ------  Password Check  ------")
+    isChanged = False
     if (file_exists('/var/log/passwordlogs.txt')):
         oldPassword = file_read('/var/log/passwordlogs.txt')
         if (oldPassword != password):
