@@ -93,17 +93,18 @@ if platform.system() == 'Linux':
     if oldHostname != hostname:
         app_log.info('Hostname is different in API. Changing hostname in VM.')
         os.system('hostnamectl set-hostname {}'.format(hostname))
+    else:
+        app_log.info('Hostname is not changed in API')
 
     # Storage
     app_log.info(" ------  Storage Check  ------")
-    isDiskLog = os.path.exists('/var/log/disklogs.txt')
     url_repo = 'https://raw.githubusercontent.com/plusclouds/vmOperations/main/storage.py'
-    if (isDiskLog == True):
+    if (file_exists('/var/log/disklogs.txt')):
         oldDisk = file_read('/var/log/disklogs.txt')
         if oldDisk != total_disk:
             app_log.info("Disk is changed from API. Executing storage.py")
             execute_script(url_repo)
-        if os.path.exists("/var/log/isExtended.txt") == True:
+        if file_exists("/var/log/isExtended.txt"):
             isExtended = file_read("/var/log/isExtended.txt")
             if isExtended == '1':
                 app_log.info(
@@ -120,8 +121,7 @@ if platform.system() == 'Windows':
         1].strip()
     # requests the information of the instance
     response = requests.get(
-        'https://api.plusclouds.com/v2/iaas/virtual-machines/meta-data?uuid={}'.format(uuid))
-    response = response.json()  # json to dict
+        'https://api.plusclouds.com/v2/iaas/virtual-machines/meta-data?uuid={}'.format(uuid)).json()
     password = response['data']['password']
     hashed_password = sha256(password.encode()).hexdigest()
     hostname = response['data']['hostname']
