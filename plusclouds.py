@@ -26,7 +26,7 @@ app_log = logging.getLogger('root')
 app_log.setLevel(logging.INFO)
 
 app_log.addHandler(log_handler)
-
+app_log.info("")
 app_log.info("============== Start of Execution at {}  =============".format(
     time.asctime()))
 

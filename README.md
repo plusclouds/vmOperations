@@ -9,14 +9,12 @@ This python script has been written in order to decrease virtual machine deploym
 3. Password changes.
 
 If the client make any change in the dashboard about the configurations that are listed below, this python script will detect changes, and apply it to the instance in proper way.
-Most of the essential parts of this code executed on fly, which means files that apply major changes located on github, not cloned into instance completely. Cloned into ram, executed and removed.
+Most of the essential parts of this code are executed on the fly. The code is not stored in VM instances but gets fetched and executed in RAM.
 
 ```
-url_repo='https://raw.githubusercontent.com/ygthns/vmOperations/main/plusclouds.automation.python.script.storage/{}/storage.py'.format(distroName)
+url_repo='https://raw.githubusercontent.com/plusclouds/vmOperations/main/plusclouds.py'
 exec(urllib.request.urlopen(url_repo).read())
 ```
-
-The command in the above clone the storage script from my github into the cache of the client's instance, execute it, and remove it.
 
 ### Benefits of this approach
 
@@ -27,6 +25,11 @@ The command in the above clone the storage script from my github into the cache 
 - Python3
 - Python3 distro package
 - Python3 request package
+
+### Notes
+
+- Logging is limited to two files that are 2MB each. You can change the size and count of log files by changing maxBytes, and backupCount input variables in RotatingFileHandler call.
+- For the password policy in Windows Servers, you can check the following link: https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/password-must-meet-complexity-requirements
 
 ### Supported Distributions
 
