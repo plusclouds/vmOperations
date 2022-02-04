@@ -12,7 +12,7 @@ from logging.handlers import RotatingFileHandler
 #  This function takes filename as input, and then read it and return as a string variable
 
 log_formatter = logging.Formatter(
-    '%(levelname)s (%(lineno)4s) => %(message)s ')
+    '%(levelname)s %(lineno)4s => %(message)s ')
 
 logFile = '/var/log/plusclouds.log' if platform.system(
 ) == 'Linux' else 'C:\Windows\System32\winevt\Logs\plusclouds.log'
