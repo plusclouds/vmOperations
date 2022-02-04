@@ -124,7 +124,7 @@ if platform.system() == 'Windows':
     distroName = str(platform.system()) + '_' + str(platform.release())
     uuid = sp.check_output('wmic bios get serialnumber').decode().split('\n')[
         1].strip()
-    # requests the information of the instance
+    # Requests the information of the instance
     response = requests.get(
         '{}/v2/iaas/virtual-machines/meta-data?uuid={}'.format(base_url, uuid)).json()
     password = response['data']['password']
@@ -132,45 +132,48 @@ if platform.system() == 'Windows':
     hostname = response['data']['hostname']
 
     # Password
-
+    app_log.info(" ------  Password Check  ------")
     isChanged = False
-    fileFlag = os.path.exists(
-        'C:\Windows\System32\winevt\Logs\passwordlog.txt')
-    if (fileFlag == True):
+    if (file_exists('C:\Windows\System32\winevt\Logs\passwordlog.txt')):
         oldPassword = file_read(
             'C:\Windows\System32\winevt\Logs\passwordlog.txt')
         if (oldPassword != hashed_password):
+            app_log.info(
+                "Password in API is different. Setting isChanged to True")
             isChanged = True
-            print('Password has been changed since last execution')
-            f = open("C:\Windows\System32\winevt\Logs\passwordlog.txt", "w+")
-            f.write(password)
-            f.close()
+            file_write(
+                "C:\Windows\System32\winevt\Logs\passwordlog.txt", hashed_password)
         else:
-            print('Password has not been changed')
+            app_log.info(
+                "Password hasn't been changed in API")
     else:
         isChanged = True
-        f = open("C:\Windows\System32\winevt\Logs\passwordlog.txt", "w+")
-        f.write(hashed_password)
-        f.close()
+        file_write("C:\Windows\System32\winevt\Logs\passwordlog.txt",
+                   hashed_password)
     if (isChanged == True):
+        app_log.info("Executing password change call.")
         sp.call("net users" + " Administrator " + password, shell=True)
 
     # Hostname
 
+    app_log.info(" ------  Hostname Check  ------")
     current_hostname = sp.check_output(
         'hostname').decode().split('\n')[0].strip()
     hostname = hostname if len(hostname) <= 15 else hostname[0:15]
     if hostname != current_hostname:
+        app_log.info(" Hostname is changed in API. Changing hostname in VM.")
         sp.call(["powershell", "Rename-Computer -NewName " + hostname], shell=True)
 
     # Disk
 
+    app_log.info(" ------ Disk Check ------")
     p = sp.Popen(["diskpart"], stdout=sp.PIPE,
                  stdin=sp.PIPE, stderr=sp.PIPE)
     commands = ['select disk 0\n', 'select vol 2\n', 'extend\n', 'exit\n']
     for command in commands:
         p.stdin.write(bytes(command, 'utf-8'))
         time.sleep(.3)
+    app_log.info(" ------ Disk Check End ------")
 
     # WinRM toggle
 
@@ -192,9 +195,9 @@ if platform.system() == 'Windows':
         p = sp.Popen(['powershell.exe', file_loc +
                       '\\ansible_setup.ps1'], stdout=sp.PIPE)
         out, err = p.communicate()
-        print(out)
+        app_log.info(out)
         if err:
-            print(err)
+            app_log.info(err)
 
     def is_winrm_set():
         output = sp.check_output(
@@ -206,9 +209,6 @@ if platform.system() == 'Windows':
 
         return (winrm_listener['Enabled'] == 'true' and winrm_listener['CertificateThumbprint'] and winrm_listener['ListeningOn'])
 
-    uuid = sp.check_output('wmic bios get serialnumber ').decode().split('\n')[
-        1].strip()
-
     winrm_api_status = False
     if 'winrm_enabled' in response['data']:
         winrm_api_status = response['data']['winrm_enabled']
@@ -218,11 +218,14 @@ if platform.system() == 'Windows':
     if winrm_api_status:
         if not is_winrm_running:
             p = sp.Popen('powershell.exe Start-Service winrm')
+            app_log.info(" Starting WinRM service.")
         if not is_winrm_set():
+            app_log.info(" WinRM is not set. Setting it up.")
             setup_winrm()
     else:
         if is_winrm_running:
             p = sp.Popen('powershell.exe Stop-Service winrm')
+            app_log.info(" Stopping WinRM service.")
 
 app_log.info("============== End of Execution at {}  =============".format(
     time.asctime()))

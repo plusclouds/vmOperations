@@ -4,12 +4,12 @@ This python script has been written in order to decrease virtual machine deploym
 
 ### What Changes?
 
-1. Storage size.
-2. Hostname changes.
-3. Password changes.
+1. Storage Size
+2. Hostname
+3. Password
 
-If the client make any change in the dashboard about the configurations that are listed below, this python script will detect changes, and apply it to the instance in proper way.
-Most of the essential parts of this code are executed on the fly. The code is not stored in VM instances but gets fetched and executed in RAM.
+If the client make any change in the dashboard about the configurations that are listed below, this python script will detect changes, and apply these changes to the instance.
+Most of the essential parts of this code are executed on the fly. The code is not stored in VM instances but gets fetched from the repository and gets executed in RAM.
 
 ```
 url_repo='https://raw.githubusercontent.com/plusclouds/vmOperations/main/plusclouds.py'
@@ -33,21 +33,12 @@ exec(urllib.request.urlopen(url_repo).read())
 
 ### Supported Distributions
 
-- Centos7
-- Debian10
-- Debian11
-- Pardus18
-- Debian9
+- Centos (7,8)
+- Debian (9,10,11)
+- Pardus (18.0,19.0)
+- Ubuntu (16.04,18.04,19.04,19.10,20.04)
 - Fedora30
-- Pardus19.0
-- Ubuntu16.04
-- Ubuntu18.04
-- Ubuntu19.04
-- Ubuntu19.10
-- Ubuntu20.04
-
-- Windows Server 2019
-- Windows Server 2016
+- Windows Server (2016,2019)
 
 ### Performance Results
 
@@ -57,5 +48,5 @@ exec(urllib.request.urlopen(url_repo).read())
 
 ### Author Information
 
-Talha Unsel - talha.unsel@plusclouds.com
+Talha Unsel - talha.unsel@plusclouds.com  
 Yigithan Saglam - saglamyigithan@gmail.com
