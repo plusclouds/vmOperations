@@ -82,10 +82,13 @@ if platform.system() == 'Linux':
     if (isChanged == True):
         app_log.info(
             'isChanged variable is set to True. Executing password change call')
-        cmd = "bash -c \"echo -e '{}\\n{}' | passwd root\"".format(
-            readablePassword, readablePassword)
-        sp.check_call(cmd, shell=True)
-        app_log.info('Password has been updated successfully')
+        p = sp.Popen('passwd', stdout=sp.PIPE, stdin=sp.PIPE, stderr=sp.STDOUT)
+        stdout, stderr = p.communicate(
+            input="{0}\n{0}\n".format(readablePassword).encode())
+        if stderr:
+            app_log.error(stderr)
+        else:
+            app_log.info('Password has been updated successfully')
 
     # Hostname
     app_log.info(" ------  Hostname Check  ------")
