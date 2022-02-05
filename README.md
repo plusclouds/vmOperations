@@ -29,7 +29,9 @@ exec(urllib.request.urlopen(url_repo).read())
 ### Notes
 
 - Logging is limited to two files that are 2MB each. You can change the size and count of log files by changing maxBytes, and backupCount input variables in RotatingFileHandler call.
-- For the password policy in Windows Servers, you can check the following link: https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/password-must-meet-complexity-requirements
+- For the hosname and password policy in Windows Servers, you can check the following links
+  - Password: https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/password-must-meet-complexity-requirements
+  - Hostname: https://docs.microsoft.com/en-us/troubleshoot/windows-server/identity/naming-conventions-for-computer-domain-site-ou
 
 ### Supported Distributions
 

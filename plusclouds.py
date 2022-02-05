@@ -163,6 +163,8 @@ if platform.system() == 'Windows':
     if hostname != current_hostname:
         app_log.info(" Hostname is changed in API. Changing hostname in VM.")
         sp.call(["powershell", "Rename-Computer -NewName " + hostname], shell=True)
+    else:
+        app_log.info("Hostname is NOT changed in API.")
 
     # Disk
 
