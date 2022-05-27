@@ -9,6 +9,7 @@ import urllib.request
 import logging
 from logging.handlers import RotatingFileHandler
 
+
 #  This function takes filename as input, and then read it and return as a string variable
 
 log_formatter = logging.Formatter(
