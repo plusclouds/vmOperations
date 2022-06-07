@@ -51,7 +51,7 @@ def file_exists(fname):
     return os.path.exists(fname)
 
 
-base_url = os.getenv('LEO_URL', "https://api.plusclouds.com")
+base_url = os.getenv('LEO_URL', "http://127.0.0.1:8000")
 
 if platform.system() == 'Linux':
     # uuid of the vm assigned to uuid variable
@@ -60,8 +60,11 @@ if platform.system() == 'Linux':
     response = requests.get(
         '{}/v2/iaas/virtual-machines/meta-data?uuid={}'.format(base_url, uuid)).json()
     oldDisk = '0'
+    if "error" in response.keys():
+        raise Exception(response["error"]["message"])
+    if "data" not in response.keys():
+        raise Exception("Faulty response.")
 
-    response["data"]
     total_disk = str(response['data']['virtualDisks']['data'][0]['total_disk'])
     hostname = response['data']['hostname']
     readablePassword = response['data']['password']
