@@ -10,8 +10,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 
 #  This function takes filename as input, and then read it and return as a string variable
-
-from vmOperations import module_search
+import module_search.service_search
 
 log_formatter = logging.Formatter(
     '%(levelname)s %(lineno)4s => %(message)s ')
@@ -61,6 +60,8 @@ if platform.system() == 'Linux':
     response = requests.get(
         '{}/v2/iaas/virtual-machines/meta-data?uuid={}'.format(base_url, uuid)).json()
     oldDisk = '0'
+
+    response["data"]
     total_disk = str(response['data']['virtualDisks']['data'][0]['total_disk'])
     hostname = response['data']['hostname']
     readablePassword = response['data']['password']
@@ -94,13 +95,14 @@ if platform.system() == 'Linux':
         else:
             app_log.info('Password has been updated successfully')
     #Service Roles
-    app_log.info(" ------  Service Roles Check  ------")
-    for i in response["data"]["serviceRoles"]["data"]:
-        app_log.info('Installing unzipping and executing the ' + i["name"] + " execution files in url" + i["url"])
+    if "serviceRoles" in response["data"].keys():
+        app_log.info(" ------  Service Roles Check  ------")
+        for i in response["data"]["serviceRoles"]["data"]:
+            app_log.info('Installing unzipping and executing the ' + i["name"] + " execution files in url" + i["url"])
 
-        service = module_search.service_search.plusclouds_service(i["name"], i["url"])
+            service = module_search.service_search.plusclouds_service(i["name"], i["url"])
 
-        service.run()
+            service.run()
 
     # Hostname
     app_log.info(" ------  Hostname Check  ------")

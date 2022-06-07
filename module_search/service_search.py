@@ -61,7 +61,7 @@ class plusclouds_service:
     def initiate_ansible(self):
         if not self.is_downloaded:
             self.download_module()
-        execute_playbook_script("index.yml")
+        execute_playbook_script("install.yml")
         self.is_initiated = True
 
     def run(self):
