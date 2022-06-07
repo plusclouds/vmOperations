@@ -9,8 +9,9 @@ import urllib.request
 import logging
 from logging.handlers import RotatingFileHandler
 
-
 #  This function takes filename as input, and then read it and return as a string variable
+
+from vmOperations import module_search
 
 log_formatter = logging.Formatter(
     '%(levelname)s %(lineno)4s => %(message)s ')
@@ -19,7 +20,7 @@ logFile = '/var/log/plusclouds.log' if platform.system(
 ) == 'Linux' else 'C:\Windows\System32\winevt\Logs\plusclouds.log'
 
 log_handler = RotatingFileHandler(
-    logFile, mode='a', maxBytes=2*1024*1024, backupCount=1, encoding=None, delay=0)
+    logFile, mode='a', maxBytes=2 * 1024 * 1024, backupCount=1, encoding=None, delay=0)
 log_handler.setFormatter(log_formatter)
 log_handler.setLevel(logging.INFO)
 
@@ -92,6 +93,14 @@ if platform.system() == 'Linux':
             app_log.error(stderr)
         else:
             app_log.info('Password has been updated successfully')
+    #Service Roles
+    app_log.info(" ------  Service Roles Check  ------")
+    for i in response["data"]["serviceRoles"]["data"]:
+        app_log.info('Installing unzipping and executing the ' + i["name"] + " execution files in url" + i["url"])
+
+        service = module_search.service_search.plusclouds_service(i["name"], i["url"])
+
+        service.run()
 
     # Hostname
     app_log.info(" ------  Hostname Check  ------")
@@ -178,6 +187,7 @@ if platform.system() == 'Windows':
         time.sleep(.3)
     app_log.info(" ------ Disk Check End ------")
 
+
     # WinRM toggle
 
     def setup_winrm():
@@ -202,6 +212,7 @@ if platform.system() == 'Windows':
         if err:
             app_log.info(err)
 
+
     def is_winrm_set():
         output = sp.check_output(
             'powershell.exe winrm enumerate winrm/config/Listener')
@@ -210,7 +221,9 @@ if platform.system() == 'Windows':
         output = output.decode("utf-8").split('Listener')[2].split('\r\n    ')
         winrm_listener = dict([i.split(' = ') for i in output[1:]])
 
-        return (winrm_listener['Enabled'] == 'true' and winrm_listener['CertificateThumbprint'] and winrm_listener['ListeningOn'])
+        return (winrm_listener['Enabled'] == 'true' and winrm_listener['CertificateThumbprint'] and winrm_listener[
+            'ListeningOn'])
+
 
     winrm_api_status = False
     if 'winrm_enabled' in response['data']:
