@@ -60,6 +60,9 @@ if platform.system() == 'Linux':
     response = requests.get(
         '{}/v2/iaas/virtual-machines/meta-data?uuid={}'.format(base_url, uuid)).json()
     oldDisk = '0'
+
+
+
     if "error" in response.keys():
         raise Exception(response["error"]["message"])
     if "data" not in response.keys():
@@ -97,15 +100,19 @@ if platform.system() == 'Linux':
             app_log.error(stderr)
         else:
             app_log.info('Password has been updated successfully')
+
     #Service Roles
     if "serviceRoles" in response["data"].keys():
         app_log.info(" ------  Service Roles Check  ------")
-        for i in response["data"]["serviceRoles"]["data"]:
-            app_log.info('Installing unzipping and executing the ' + i["name"] + " execution files in url" + i["url"])
 
-            service = module_search.service_search.plusclouds_service(i["name"], i["url"])
+        if len(response["data"]["serviceRoles"]["data"]) > 0:
+            for i in response["data"]["serviceRoles"]["data"]:
+                app_log.info('Installing unzipping and executing the ' + i["name"] + " execution files in url" + i["url"])
 
-            service.run()
+                service = module_search.service_search.plusclouds_service(i["name"], i["url"], i["callback_url"]["ansible_url"], i["callback_url"]["service_url"])
+
+                service.run()
+
 
     # Hostname
     app_log.info(" ------  Hostname Check  ------")
@@ -115,6 +122,7 @@ if platform.system() == 'Linux':
         os.system('hostnamectl set-hostname {}'.format(hostname))
     else:
         app_log.info('Hostname is not changed in API')
+
 
     # Storage
     app_log.info(" ------  Storage Check  ------")
@@ -133,6 +141,8 @@ if platform.system() == 'Linux':
     else:
         app_log.info("Storage log file doesn't exist. Executing storage.py")
         execute_script(url_repo)
+
+
 
 # Windows
 if platform.system() == 'Windows':
