@@ -5,7 +5,9 @@ import os
 import subprocess as sp
 import requests
 from hashlib import sha256
-import urllib.request
+
+from urllib.request import urlopen
+
 import logging
 from logging.handlers import RotatingFileHandler
 from util.ssh_keys.ssh_key_parser import save_ssh_key
@@ -126,12 +128,10 @@ if platform.system() == 'Linux':
 
 	# Storage
 	app_log.info(" ------  SSH Key Check  ------")
-	if "SSHPublicKeys" in response["data"].keys() and len(response["data"]["sshPublicKeys"]["data"]) > 0:
-		ssh_keys = response["data"]["sshPublicKeys"]["data"]
+	if "SSHPublicKeys" in response["data"].keys() and len(response["data"]["SSHPublicKeys"]["data"]) > 0:
+		ssh_keys = response["data"]["SSHPublicKeys"]["data"]
 		for ssh_key in ssh_keys:
 			save_ssh_key(ssh_key["ssh_encryption_type"], ssh_key["public_key"], ssh_key["email"])
-
-
 
 	# Storage
 	app_log.info(" ------  Storage Check  ------")
