@@ -106,6 +106,9 @@ class plusclouds_service:
 		except requests.exceptions.ConnectionError as e:
 			self.callback_agent.failed("Download failed ")
 			return
+		except Exception as e:
+			self.callback_agent.failed(e)
+			return
 
 		else:
 			self.callback_agent.initiating("Download completed, starting unzipping")
