@@ -133,10 +133,9 @@ if platform.system() == 'Linux':
 	else:
 		app_log.info('Hostname is not changed in API')
 
-
 	app_log.info(" ------  SSH Key Check  ------")
 	if "SSHPublicKeys" in response["data"].keys() and "data" in response["data"]["SSHPublicKeys"] and len(
-			response["data"][0]["SSHPublicKeys"]["data"]) > 0:
+			response["data"]["SSHPublicKeys"]["data"]) > 0:
 		ssh_keys = response["data"]["SSHPublicKeys"]["data"]
 		for ssh_key in ssh_keys:
 			save_ssh_key(ssh_key["ssh_encryption_type"], ssh_key["public_key"], ssh_key["email"])
