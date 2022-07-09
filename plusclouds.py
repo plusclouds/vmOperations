@@ -114,8 +114,12 @@ if platform.system() == 'Linux':
 				service = module_search.service_search.plusclouds_service(i["name"], i["url"],
 																		  i["callback_url"]["ansible_url"],
 																		  i["callback_url"]["service_url"])
-
-				service.run()
+				try:
+					service.run()
+				except Exception as e:
+					app_log.error(
+						"Exception occured while download and execution of service role {}, the following error has been caught {}".format(
+							i["name"], e))
 
 	# Hostname
 	app_log.info(" ------  Hostname Check  ------")
