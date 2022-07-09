@@ -58,15 +58,15 @@ def execute_playbook_script(directory: str):
 	print("executing Playbook in dir: ", directory)
 
 	if not os.path.exists(directory):
-		return False
+		return False, ""
 
 	path = "/".join(directory.split("/")[0:-1])
 
-	print(os.system(
-		"ansible-playbook -i hosts " + directory + " > " + path + "/execution.log"))  # haven't tried with -i hosts flag
+	result = os.system(
+		"ansible-playbook -i hosts " + directory + " > " + path + "/execution.log")  # haven't tried with -i hosts flag
 	print("Execution complete!")
 
-	return True
+	return True, result
 
 
 class plusclouds_service:
@@ -98,8 +98,9 @@ class plusclouds_service:
 		if not self.is_downloaded:
 			self.download_module()
 
-		execute_playbook_script(self.download_path + "/install.yml")
+		result, log = execute_playbook_script(self.download_path + "/install.yml")
 		self.is_initiated = True
+		return result, log
 
 	def run(self):
 		self.callback_agent.downloading("Downloading starting")
@@ -121,5 +122,5 @@ class plusclouds_service:
 		else:
 			self.callback_agent.initiating("Playbook Execution starting.")
 
-		self.initiate_ansible()
-		self.callback_agent.completed("Completed!")
+		result, log = self.initiate_ansible()
+		self.callback_agent.completed(log)
