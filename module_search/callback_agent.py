@@ -10,7 +10,7 @@ class CallbackAgent:
             "service_report": message,
             "service_status": status
         }
-
+        print(message)
         requests.put(self.url, data=body)
 
 

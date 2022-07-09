@@ -41,7 +41,6 @@ def unzip(directory: str):
 
 	path = "/".join(directory_list)
 
-
 	if ".zip" in file_name:
 		os.system("apt-get install unzip")
 
@@ -50,7 +49,7 @@ def unzip(directory: str):
 		print("Execution complete!")
 
 	if ".tar.gz" in file_name:
-		os.system("tar -xf "+directory+" -C " + path)
+		os.system("tar -xf " + directory + " -C " + path)
 
 	return True
 
@@ -61,7 +60,10 @@ def execute_playbook_script(directory: str):
 	if not os.path.exists(directory):
 		return False
 
-	print(os.system("ansible-playbook -i hosts " + directory))  # haven't tried with -i hosts flag
+	path = "/".join(directory.split("/")[0:-1])
+
+	print(os.system(
+		"ansible-playbook -i hosts " + directory + " > " + path + "/execution.log"))  # haven't tried with -i hosts flag
 	print("Execution complete!")
 
 	return True
