@@ -1,5 +1,7 @@
 import time
 import platform
+import urllib
+
 import distro
 import os
 import subprocess as sp
