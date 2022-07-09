@@ -34,11 +34,23 @@ def unzip(directory: str):
 	if not os.path.exists(directory):
 		return False
 
-	os.system("apt-get install unzip")
+	directory_list = directory.split("/")
+	file_name = directory_list[-1]
 
-	print(os.system("unzip -o " + directory))
+	directory_list.pop()
 
-	print("Execution complete!")
+	path = "/".join(directory_list)
+
+
+	if ".zip" in file_name:
+		os.system("apt-get install unzip")
+
+		os.system("sudo unzip -o " + directory + " -d " + path + "/")
+
+		print("Execution complete!")
+
+	if ".tar.gz" in file_name:
+		os.system("tar -xf "+directory+" -C " + path)
 
 	return True
 
@@ -59,7 +71,7 @@ class plusclouds_service:
 	def __init__(self, service_name: str, service_url: str, callback_ansible_url: str, callback_service_url: str):
 		self.service_name = service_name
 
-		self.download_path = "./services" + service_name
+		self.download_path = "./services_" + service_name
 
 		self.is_downloaded = False
 
@@ -84,7 +96,7 @@ class plusclouds_service:
 		if not self.is_downloaded:
 			self.download_module()
 
-		execute_playbook_script("install.yml")
+		execute_playbook_script(self.download_path + "/install.yml")
 		self.is_initiated = True
 
 	def run(self):
