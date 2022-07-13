@@ -53,7 +53,7 @@ def extend_disk():
 		# app_log.info(e)
 		pass
 
-	file = open("/var/log/plusclouds/plusclouds/isExtended.txt", "w+")
+	file = open("/var/log/plusclouds/isExtended.txt", "w+")
 	file.write("1")
 	file.close()
 	# app_log.info('Rebooting system due to extend_disk operation')
