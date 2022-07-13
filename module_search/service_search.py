@@ -122,5 +122,7 @@ class plusclouds_service:
 		else:
 			self.callback_agent.initiating("Playbook Execution starting.")
 
-		result, log = self.initiate_ansible()
-		self.callback_agent.completed(log)
+		self.initiate_ansible()
+
+		log_file = open(self.download_path + "/execution.log", "r")
+		self.callback_agent.completed(log_file.read())
