@@ -18,6 +18,30 @@ from util.ssh_keys.ssh_key_parser import save_ssh_key
 #  This function takes filename as input, and then read it and return as a string variable
 import module_search.service_search
 
+
+def create_file_if_not_exists(fname):
+	if not file_exists(fname):
+		file = open(fname, "w")
+		file.close()
+
+
+def create_folder_if_not_exists(dir_name):
+	os.makedirs(dir_name, exist_ok=True)
+
+
+def file_exists(fname):
+	return os.path.exists(fname)
+
+
+# Creates the isExtended file if it doesn't exists file
+create_folder_if_not_exists("/var/log/plusclouds")
+
+create_file_if_not_exists("/var/log/plusclouds/plusclouds.log")
+create_file_if_not_exists("/var/log/plusclouds/isExtended.txt")
+create_file_if_not_exists("/var/log/plusclouds/disklogs.txt")
+create_file_if_not_exists("/var/log/disklogs.txt")
+
+
 log_formatter = logging.Formatter(
 	'%(levelname)s %(lineno)4s => %(message)s ')
 
@@ -53,28 +77,6 @@ def file_write(fname, data):
 	file.write(data)
 	file.close()
 
-
-def create_file_if_not_exists(fname):
-	if not file_exists(fname):
-		file = open(fname, "w")
-		file.close()
-
-
-def create_folder_if_not_exists(dir_name):
-	os.makedirs(dir_name, exist_ok=True)
-
-
-def file_exists(fname):
-	return os.path.exists(fname)
-
-
-# Creates the isExtended file if it doesn't exists file
-create_folder_if_not_exists("/var/log/plusclouds")
-
-create_file_if_not_exists("/var/log/plusclouds/plusclouds.log")
-create_file_if_not_exists("/var/log/plusclouds/isExtended.txt")
-create_file_if_not_exists("/var/log/plusclouds/disklogs.txt")
-create_file_if_not_exists("/var/log/disklogs.txt")
 
 base_url = os.getenv('LEO_URL', "http://127.0.0.1:8000")
 
