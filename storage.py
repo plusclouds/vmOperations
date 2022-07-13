@@ -78,7 +78,7 @@ base_url = os.getenv('LEO_URL', "http://api.plusclouds.com")
 uuid = sp.getoutput('/usr/sbin/dmidecode -s system-uuid')
 try:
 	response = requests.get(
-		'{}/v2/iaas/virtual-machines/meta-data?uuid={}'.format(base_url, uuid)).json()
+		'{}/v2/iaas/virtual-machines/meta-data?uuid={}'.format(base_url, uuid))
 except requests.exceptions.RequestException as e:
 	# app_log.error(e)
 	raise SystemExit(e)
