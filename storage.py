@@ -52,15 +52,15 @@ def extend_disk():
         app_log.info(e)
         pass
 
-    file = open("/var/log/isExtended.txt", "w+")
+    file = open("/var/log/plusclouds/plusclouds/isExtended.txt", "w+")
     file.write("1")
     file.close()
     app_log.info('Rebooting system due to extend_disk operation')
     os.system('sudo reboot')
 
 
-app_log.info('isExtended = ' + file_read('/var/log/isExtended.txt') +
-             ' || disklogs = ' + file_read('/var/log/disklogs.txt'))
+app_log.info('isExtended = ' + file_read('/var/log/plusclouds/isExtended.txt') +
+             ' || disklogs = ' + file_read('/var/log/plusclouds/disklogs.txt'))
 xvdaCount = str(len(fnmatch.filter(os.listdir('/dev'), 'xvda*')) - 1)
 
 
@@ -85,22 +85,22 @@ total_disk = str(response_dict['data']
                  ['virtualDisks']['data'][0]['total_disk'])
 
 oldDisk = '0' if not file_exists(
-    '/var/log/disklogs.txt') else file_read('/var/log/disklogs.txt')
+    '/var/log/plusclouds/disklogs.txt') else file_read('/var/log/plusclouds/disklogs.txt')
 
-file_write("/var/log/disklogs.txt", total_disk)
+file_write("/var/log/plusclouds/disklogs.txt", total_disk)
 
 if (total_disk != '10240'):
-    if (not file_exists('/var/log/isExtended.txt')) or (oldDisk != total_disk):
+    if (not file_exists('/var/log/plusclouds/isExtended.txt')) or (oldDisk != total_disk):
         app_log.info(
             'Calling extend_disk function due either to inequalit of oldDisk and total_disk or non-existence of isExtended.txt file')
         extend_disk()
 
 else:
     app_log.info('No need to extend disk because total_disk is 10240')
-    file_write("/var/log/isExtended.txt", '0')
+    file_write("/var/log/plusclouds/isExtended.txt", '0')
 
-isExtended = file_read("/var/log/isExtended.txt")
+isExtended = file_read("/var/log/plusclouds/isExtended.txt")
 if (isExtended == '1'):
     app_log.info('Resizing the disk since isExtended is 1')
     os.system(resizeCall)
-    file_write("/var/log/isExtended.txt", '0')
+    file_write("/var/log/plusclouds/isExtended.txt", '0')
