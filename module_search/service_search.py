@@ -106,6 +106,8 @@ class plusclouds_service:
 		self.callback_agent.downloading("Downloading starting")
 		try:
 			path = self.download_module()
+			if path == "":
+				raise requests.exceptions.ConnectionError()
 		except requests.exceptions.ConnectionError as e:
 			self.callback_agent.failed("Download failed ")
 			return
