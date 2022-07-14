@@ -78,7 +78,7 @@ def file_write(fname, data):
 	file.close()
 
 
-base_url = os.getenv('LEO_URL', "http://127.0.0.1:8000")
+base_url = os.getenv('LEO_URL', "http://10.100.0.25")
 
 if platform.system() == 'Linux':
 	# uuid of the vm assigned to uuid variable

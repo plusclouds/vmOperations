@@ -1,9 +1,13 @@
+import os
+
 import requests
 
 
 class CallbackAgent:
 	def __init__(self, url):
-		self.url = url
+		base_url = os.getenv('LEO_URL', "http://10.100.0.25")
+
+		self.url = base_url + "/" + url
 		print("New Callback Agent formed, with the following url : {}".format(url))
 
 	def __send_message(self, status: str, message: str):
