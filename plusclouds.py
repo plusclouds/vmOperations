@@ -1,3 +1,4 @@
+import pathlib
 import time
 import platform
 import urllib
@@ -17,10 +18,34 @@ from util.ssh_keys.ssh_key_parser import save_ssh_key
 #  This function takes filename as input, and then read it and return as a string variable
 import module_search.service_search
 
+
+def create_file_if_not_exists(fname):
+	if not file_exists(fname):
+		file = open(fname, "w")
+		file.close()
+
+
+def create_folder_if_not_exists(dir_name):
+	os.makedirs(dir_name, exist_ok=True)
+
+
+def file_exists(fname):
+	return os.path.exists(fname)
+
+
+# Creates the isExtended file if it doesn't exists file
+create_folder_if_not_exists("/var/log/plusclouds")
+
+create_file_if_not_exists("/var/log/plusclouds/plusclouds.log")
+create_file_if_not_exists("/var/log/plusclouds/isExtended.txt")
+create_file_if_not_exists("/var/log/plusclouds/disklogs.txt")
+create_file_if_not_exists("/var/log/disklogs.txt")
+
+
 log_formatter = logging.Formatter(
 	'%(levelname)s %(lineno)4s => %(message)s ')
 
-logFile = '/var/log/plusclouds.log' if platform.system(
+logFile = '/var/log/plusclouds/plusclouds.log' if platform.system(
 ) == 'Linux' else 'C:\Windows\System32\winevt\Logs\plusclouds.log'
 
 log_handler = RotatingFileHandler(
@@ -43,6 +68,7 @@ def file_read(fname):
 
 
 def execute_script(url):
+	print(url)
 	exec(urllib.request.urlopen(url).read())
 
 
@@ -52,11 +78,7 @@ def file_write(fname, data):
 	file.close()
 
 
-def file_exists(fname):
-	return os.path.exists(fname)
-
-
-base_url = os.getenv('LEO_URL', "http://127.0.0.1:8000")
+base_url = os.getenv('LEO_URL', "http://10.100.0.25")
 
 if platform.system() == 'Linux':
 	# uuid of the vm assigned to uuid variable
@@ -79,20 +101,20 @@ if platform.system() == 'Linux':
 	# Password
 	app_log.info(" ------  Password Check  ------")
 	isChanged = False
-	if (file_exists('/var/log/passwordlogs.txt')):
-		oldPassword = file_read('/var/log/passwordlogs.txt')
+	if (file_exists('/var/log/plusclouds/passwordlogs.txt')):
+		oldPassword = file_read('/var/log/plusclouds/passwordlogs.txt')
 		if (oldPassword != password):
 			app_log.info(
 				'Password in API is different. Setting isChanged variable to True')
 			isChanged = True
-			file_write("/var/log/passwordlogs.txt", password)
+			file_write("/var/log/plusclouds/passwordlogs.txt", password)
 		else:
 			app_log.info("Password is not changed in API.")
 	else:
 		app_log.info(
 			"Password log file doesn't exist. Setting isChanged variable to True")
 		isChanged = True
-		file_write("/var/log/passwordlogs.txt", password)
+		file_write("/var/log/plusclouds/passwordlogs.txt", password)
 	if (isChanged == True):
 		app_log.info(
 			'isChanged variable is set to True. Executing password change call')
@@ -132,9 +154,9 @@ if platform.system() == 'Linux':
 	else:
 		app_log.info('Hostname is not changed in API')
 
-	# Storage
 	app_log.info(" ------  SSH Key Check  ------")
-	if "SSHPublicKeys" in response["data"].keys() and len(response["data"]["SSHPublicKeys"]["data"]) > 0:
+	if "SSHPublicKeys" in response["data"].keys() and "data" in response["data"]["SSHPublicKeys"] and len(
+			response["data"]["SSHPublicKeys"]["data"]) > 0:
 		ssh_keys = response["data"]["SSHPublicKeys"]["data"]
 		for ssh_key in ssh_keys:
 			save_ssh_key(ssh_key["ssh_encryption_type"], ssh_key["public_key"], ssh_key["email"])
@@ -142,13 +164,13 @@ if platform.system() == 'Linux':
 	# Storage
 	app_log.info(" ------  Storage Check  ------")
 	url_repo = 'https://raw.githubusercontent.com/plusclouds/vmOperations/main/storage.py'
-	if (file_exists('/var/log/disklogs.txt')):
-		oldDisk = file_read('/var/log/disklogs.txt')
+	if (file_exists('/var/log/plusclouds/disklogs.txt')):
+		oldDisk = file_read('/var/log/plusclouds/disklogs.txt')
 		if oldDisk != total_disk:
 			app_log.info("Disk is changed from API. Executing storage.py")
-			execute_script(url_repo)
-		if file_exists("/var/log/isExtended.txt"):
-			isExtended = file_read("/var/log/isExtended.txt")
+			import storage
+		if file_exists("/var/log/plusclouds/isExtended.txt"):
+			isExtended = file_read("/var/log/plusclouds/isExtended.txt")
 			if isExtended == '1':
 				app_log.info(
 					"Disk is extended before reboot. Executing storage.py to resize")

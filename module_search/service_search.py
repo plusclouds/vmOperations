@@ -41,7 +41,6 @@ def unzip(directory: str):
 
 	path = "/".join(directory_list)
 
-
 	if ".zip" in file_name:
 		os.system("apt-get install unzip")
 
@@ -50,7 +49,7 @@ def unzip(directory: str):
 		print("Execution complete!")
 
 	if ".tar.gz" in file_name:
-		os.system("tar -xf "+directory+" -C " + path)
+		os.system("tar -xf " + directory + " -C " + path)
 
 	return True
 
@@ -59,12 +58,15 @@ def execute_playbook_script(directory: str):
 	print("executing Playbook in dir: ", directory)
 
 	if not os.path.exists(directory):
-		return False
+		return False, ""
 
-	print(os.system("ansible-playbook -i hosts " + directory))  # haven't tried with -i hosts flag
+	path = "/".join(directory.split("/")[0:-1])
+
+	result = os.system(
+		"ansible-playbook -i hosts " + directory + " > " + path + "/execution.log")  # haven't tried with -i hosts flag
 	print("Execution complete!")
 
-	return True
+	return True, result
 
 
 class plusclouds_service:
@@ -96,13 +98,16 @@ class plusclouds_service:
 		if not self.is_downloaded:
 			self.download_module()
 
-		execute_playbook_script(self.download_path + "/install.yml")
+		result, log = execute_playbook_script(self.download_path + "/install.yml")
 		self.is_initiated = True
+		return result, log
 
 	def run(self):
 		self.callback_agent.downloading("Downloading starting")
 		try:
 			path = self.download_module()
+			if path == "":
+				raise requests.exceptions.ConnectionError()
 		except requests.exceptions.ConnectionError as e:
 			self.callback_agent.failed("Download failed ")
 			return
@@ -120,4 +125,11 @@ class plusclouds_service:
 			self.callback_agent.initiating("Playbook Execution starting.")
 
 		self.initiate_ansible()
-		self.callback_agent.completed("Completed!")
+
+		log_file = open(self.download_path + "/execution.log", "r")
+		log_file_content = log_file.read()
+
+		if len(log_file_content) == 0:
+			log_file_content = "-"
+
+		self.callback_agent.completed(log_file_content)
