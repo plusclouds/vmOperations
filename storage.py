@@ -79,12 +79,19 @@ uuid = sp.getoutput('/usr/sbin/dmidecode -s system-uuid')
 try:
 	response = requests.get(
 		'{}/v2/iaas/virtual-machines/meta-data?uuid={}'.format(base_url, uuid))
-except requests.exceptions.RequestException as e:
-	# app_log.error(e)
-	raise SystemExit(e)
-response_dict = response.json()  # json to dict
-total_disk = str(response_dict['data']
-				 ['virtualDisks']['data'][0]['total_disk'])
+	if response.status_code != 200:
+		raise requests.exceptions.ConnectionError("")
+	response_dict = response.json()  # json to dict
+
+except requests.exceptions.ConnectionError as e:
+	if not file_exists("metadata.json"):
+		print("Cannot access API in {} url".format(base_url))
+		exit(-1)
+	metadata_file = open("metadata.json", "r")
+	response = json.load(metadata_file)
+	response_dict = response
+
+total_disk = str(response_dict['data']['virtualDisks']['data'][0]['total_disk'])
 
 oldDisk = '0' if not file_exists(
 	'/var/log/plusclouds/disklogs.txt') else file_read('/var/log/plusclouds/disklogs.txt')
@@ -104,5 +111,7 @@ else:
 isExtended = file_read("/var/log/plusclouds/isExtended.txt")
 if (isExtended == '1'):
 	# app_log.info('Resizing the disk since isExtended is 1')
-	os.system(resizeCall)
+	if distributionName in ['centos7', 'centos8', 'fedora30']:
+		os.system(resizeCall)
+
 	file_write("/var/log/plusclouds/isExtended.txt", '0')

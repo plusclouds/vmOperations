@@ -1,3 +1,4 @@
+import json
 import pathlib
 import time
 import platform
@@ -41,7 +42,6 @@ create_file_if_not_exists("/var/log/plusclouds/isExtended.txt")
 create_file_if_not_exists("/var/log/plusclouds/disklogs.txt")
 create_file_if_not_exists("/var/log/disklogs.txt")
 
-
 log_formatter = logging.Formatter(
 	'%(levelname)s %(lineno)4s => %(message)s ')
 
@@ -78,14 +78,28 @@ def file_write(fname, data):
 	file.close()
 
 
-base_url = os.getenv('LEO_URL', "http://10.100.0.25")
+base_url = os.getenv('LEO_URL', "http://api.plusclouds.com")
 
 if platform.system() == 'Linux':
 	# uuid of the vm assigned to uuid variable
 	uuid = sp.getoutput('/usr/sbin/dmidecode -s system-uuid')
 	# requests the information of the instance
-	response = requests.get(
-		'{}/v2/iaas/virtual-machines/meta-data?uuid={}'.format(base_url, uuid)).json()
+	try:
+		response = requests.get(
+			'{}/v2/iaas/virtual-machines/meta-data?uuid={}'.format(base_url, uuid))
+
+		if response.status_code != 200:
+			raise requests.exceptions.ConnectionError("")
+		response = response.json()
+
+	except requests.exceptions.ConnectionError as e:
+		if not file_exists("metadata.json"):
+			print("Cannot access API in {} url".format(base_url))
+			exit(-1)
+		metadata_file = open("metadata.json", "r")
+		response = json.load(metadata_file)
+
+
 	oldDisk = '0'
 
 	if "error" in response.keys():
@@ -174,10 +188,11 @@ if platform.system() == 'Linux':
 			if isExtended == '1':
 				app_log.info(
 					"Disk is extended before reboot. Executing storage.py to resize")
-				execute_script(url_repo)
+				import storage
 	else:
 		app_log.info("Storage log file doesn't exist. Executing storage.py")
-		execute_script(url_repo)
+		import storage
+
 
 # Windows
 if platform.system() == 'Windows':
