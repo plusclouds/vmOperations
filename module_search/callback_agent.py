@@ -7,7 +7,7 @@ class CallbackAgent:
 	def __init__(self, url):
 		base_url = os.getenv('LEO_URL', "http://10.100.0.25")
 
-		self.url = base_url + "/" + url
+		self.url = base_url + "/v2" + url
 		print("New Callback Agent formed, with the following url : {}".format(url))
 
 	def __send_message(self, status: str, message: str):
