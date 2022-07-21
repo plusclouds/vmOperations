@@ -127,4 +127,9 @@ class plusclouds_service:
 		self.initiate_ansible()
 
 		log_file = open(self.download_path + "/execution.log", "r")
-		self.callback_agent.completed(log_file.read())
+		log_file_content = log_file.read()
+
+		if len(log_file_content) == 0:
+			log_file_content = "-"
+
+		self.callback_agent.completed(log_file_content)
