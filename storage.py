@@ -45,7 +45,6 @@ def extend_disk():
 
 		if distributionName in ['ubuntu19.04', 'ubuntu19.10', 'ubuntu20.04']:
 			cmd = "bash -c \"echo -e 'd\n\nn\n\n\n\nN\nw\n' | sudo fdisk /dev/xvda\""
-			cmd = "bash -c \"echo -e 'd\n\nn\n\n\n\nN\nw\n' | sudo fdisk /dev/xvda\""
 
 		sp.check_call(cmd, shell=True)
 

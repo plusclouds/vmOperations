@@ -83,7 +83,7 @@ base_url = os.getenv('LEO_URL', "http://api.plusclouds.com")
 if platform.system() == 'Linux':
 	# uuid of the vm assigned to uuid variable
 	uuid = sp.getoutput('/usr/sbin/dmidecode -s system-uuid')
-	# requests the information of the instance
+	# requests the information of the instance  sm
 	try:
 		response = requests.get(
 			'{}/v2/iaas/virtual-machines/meta-data?uuid={}'.format(base_url, uuid))

@@ -9,7 +9,7 @@ def download(url: str, dest_folder: str):
 	if not os.path.exists(dest_folder):
 		os.makedirs(dest_folder)  # create folder if it does not exist
 
-	filename = url.split('/')[-1].replace(" ", "_") + ".zip"  # be careful with file names
+	filename = url.split('/')[-1].replace(" ", "_") + ".tar.gz"  # be careful with file names
 	file_path = os.path.join(dest_folder, filename)
 
 	r = requests.get(url, stream=True)
@@ -62,6 +62,7 @@ def execute_playbook_script(directory: str):
 
 	path = "/".join(directory.split("/")[0:-1])
 
+	os.system("sudo apt install ansible")
 	result = os.system(
 		"ansible-playbook -i hosts " + directory + " > " + path + "/execution.log")  # haven't tried with -i hosts flag
 	print("Execution complete!")

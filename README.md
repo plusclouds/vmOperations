@@ -52,3 +52,4 @@ exec(urllib.request.urlopen(url_repo).read())
 
 Talha Unsel - talha.unsel@plusclouds.com  
 Yigithan Saglam - saglamyigithan@gmail.com
+Semih Yönet - semihyonet@gmail.com
