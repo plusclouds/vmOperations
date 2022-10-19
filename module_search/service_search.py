@@ -1,7 +1,7 @@
 import os
 from requests.exceptions import ConnectionError
 from module_search.ansible_operations import execute_playbook_script, download, unzip
-import module_search.callback_agent
+from module_search.callback_agent import CallbackAgent
 
 
 class PlusCloudsService:
@@ -20,14 +20,16 @@ class PlusCloudsService:
 
 		self.callback_service_url = callback_service_url
 
-		self.callback_agent = module_search.callback_agent.CallbackAgent(self.callback_service_url)
+		self.callback_agent = CallbackAgent(self.callback_service_url)
 
 	def download_module(self):
 		if self.is_downloaded:
 			raise Exception("Already downloaded!")
 
-		self.is_downloaded = True
-		return download(self.service_url, self.download_path)
+		result = download(self.service_url, self.download_path)
+		#Changing is_downloaded after executing download function
+		self.is_downloaded = True if (result != "") else False
+		return result
 
 	def initiate_ansible(self):
 		if not self.is_downloaded:
