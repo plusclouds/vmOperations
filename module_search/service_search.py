@@ -42,7 +42,7 @@ def unzip(directory: str):
 	path = "/".join(directory_list)
 
 	if ".zip" in file_name:
-		os.system("apt-get install unzip")
+		os.system("apt-get install unzip -y")
 
 		os.system("sudo unzip -o " + directory + " -d " + path + "/")
 
@@ -62,7 +62,7 @@ def execute_playbook_script(directory: str):
 
 	path = "/".join(directory.split("/")[0:-1])
 
-	os.system("sudo apt install ansible")
+	os.system("sudo apt install ansible -y")
 	result = os.system(
 		"ansible-playbook -i hosts " + directory + " > " + path + "/execution.log")  # haven't tried with -i hosts flag
 	print("Execution complete!")
