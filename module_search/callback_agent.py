@@ -1,5 +1,4 @@
 import os
-
 import requests
 
 
@@ -18,17 +17,17 @@ class CallbackAgent:
 		print("sending the following message", message)
 		requests.put(self.url, data=body)
 
-	def starting(self, message):
+	def starting(self, message: str):
 		self.__send_message("starting", message)
 
-	def downloading(self, message):
+	def downloading(self, message: str):
 		self.__send_message("downloading", message)
 
-	def initiating(self, message):
+	def initiating(self, message: str):
 		self.__send_message("initiating", message)
 
-	def completed(self, message):
+	def completed(self, message: str):
 		self.__send_message("completed", message)
 
-	def failed(self, message):
+	def failed(self, message: str):
 		self.__send_message("failed", message)
