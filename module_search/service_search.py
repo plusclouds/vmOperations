@@ -4,7 +4,7 @@ from module_search.ansible_operations import execute_playbook_script, download, 
 import module_search.callback_agent
 
 
-class plusclouds_service:
+class PlusCloudsService:
 	def __init__(self, service_name: str, service_url: str, callback_ansible_url: str, callback_service_url: str):
 		self.service_name = service_name
 

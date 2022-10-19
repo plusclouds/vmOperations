@@ -3,8 +3,6 @@ import pathlib
 import time
 import platform
 import urllib
-
-import distro
 import os
 import subprocess as sp
 import requests
@@ -17,7 +15,7 @@ from logging.handlers import RotatingFileHandler
 from util.ssh_keys.ssh_key_parser import save_ssh_key
 
 #  This function takes filename as input, and then read it and return as a string variable
-import module_search.service_search
+from module_search.service_search import PlusCloudsService
 
 
 def create_file_if_not_exists(fname):
@@ -83,6 +81,7 @@ base_url = os.getenv('LEO_URL', "http://api.plusclouds.com")
 if platform.system() == 'Linux':
 	# uuid of the vm assigned to uuid variable
 	uuid = sp.getoutput('/usr/sbin/dmidecode -s system-uuid')
+	uuid = 'e142c512-f110-d020-58e5-802ad4c1f509'
 	# requests the information of the instance  sm
 	try:
 		response = requests.get(
@@ -149,9 +148,9 @@ if platform.system() == 'Linux':
 				app_log.info(
 					'Installing unzipping and executing the ' + i["name"] + " execution files in url" + i["url"])
 
-				service = module_search.service_search.plusclouds_service(i["name"], i["url"],
-																		  i["callback_url"]["ansible_url"],
-																		  i["callback_url"]["service_url"])
+				service = PlusCloudsService(i["name"], i["url"],
+											i["callback_url"]["ansible_url"],
+											i["callback_url"]["service_url"])
 				try:
 					service.run()
 				except Exception as e:
