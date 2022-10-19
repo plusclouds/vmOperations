@@ -1,11 +1,10 @@
-import urllib.request
 import os
 import requests
 
 import module_search.callback_agent
 
 
-def download(url: str, dest_folder: str):
+def download(url: str, dest_folder: str) -> str:
 	if not os.path.exists(dest_folder):
 		os.makedirs(dest_folder)  # create folder if it does not exist
 
@@ -28,7 +27,7 @@ def download(url: str, dest_folder: str):
 		return ""
 
 
-def unzip(directory: str):
+def unzip(directory: str) -> bool:
 	print("Unzipping in dir: ", directory)
 
 	if not os.path.exists(directory):
@@ -80,7 +79,7 @@ class plusclouds_service:
 
 		self.is_initiated = False
 
-		self.service_url = service_url
+		self.service_url = service_url if (service_url.startswith("http")) else "http://" + service_url
 
 		self.callback_ansible_url = callback_ansible_url
 
