@@ -9,26 +9,26 @@ import distro
 # This function takes filename as input, and then read it and return as a string variable
 
 
-def file_read(fname):
+def file_read(fname: str) -> str:
 	with open(fname, "r") as myfile:
 		return myfile.readline().rstrip()  # read the password from file
 
 
-def file_write(fname, data):
+def file_write(fname: str, data: str) -> None:
 	file = open(fname, "w+")
 	file.write(data)
 	file.close()
 
 
-def file_exists(fname):
+def file_exists(fname: str) -> bool:
 	return os.path.exists(fname)
 
+def get_distribution() -> str:
+    return distro.id() + distro.version()
 
-distributionName = distro.id() + distro.version()
 
-
-def extend_disk():
-	global distributionName
+def extend_disk() -> None:
+	distributionName = get_distribution()
 	try:
 		if distributionName in ['ubuntu18.04']:
 			xvdaCount = len(fnmatch.filter(os.listdir('/dev'), 'xvda*'))
@@ -62,7 +62,7 @@ def extend_disk():
 # app_log.info('isExtended = ' + file_read('/var/log/plusclouds/isExtended.txt') +
 #            ' || disklogs = ' + file_read('/var/log/plusclouds/disklogs.txt'))
 xvdaCount = str(len(fnmatch.filter(os.listdir('/dev'), 'xvda*')) - 1)
-
+distributionName = get_distribution()
 if distributionName in ['centos7', 'centos8', 'fedora30']:
 	# app_log.info(
 	# 'Declaring resizecall variable to that in centos7-8, or fedora30')
@@ -72,6 +72,7 @@ if distributionName in ['centos7', 'centos8', 'fedora30']:
 # resizeCall = 'sudo resize2fs /dev/xvda{}'.format(xvdaCount)
 
 # uuid of the vm assigned to uuid variable
+
 base_url = os.getenv('LEO_URL', "http://api.plusclouds.com")
 
 uuid = sp.getoutput('/usr/sbin/dmidecode -s system-uuid')
