@@ -4,12 +4,12 @@ import platform
 import os
 import subprocess as sp
 import requests
-import storage
+from . import storage
 from hashlib import sha256
 import logging
 from logging.handlers import RotatingFileHandler
-from util.ssh_keys.ssh_key_parser import save_ssh_key
-from module_search.service_search import PlusCloudsService
+from .util.ssh_keys.ssh_key_parser import save_ssh_key
+from .module_search.service_search import PlusCloudsService
 
 
 storage.create_folder_if_not_exists("/var/log/plusclouds")

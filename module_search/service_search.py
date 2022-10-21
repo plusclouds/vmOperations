@@ -1,7 +1,6 @@
-import os
 from requests.exceptions import ConnectionError
-from module_search.ansible_operations import execute_playbook_script, download, unzip
-from module_search.callback_agent import CallbackAgent
+from ..module_search.ansible_operations import execute_playbook_script, download, unzip
+from ..module_search.callback_agent import CallbackAgent
 
 
 class PlusCloudsService:
