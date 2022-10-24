@@ -16,6 +16,16 @@ url_repo='https://raw.githubusercontent.com/plusclouds/vmOperations/main/plusclo
 exec(urllib.request.urlopen(url_repo).read())
 ```
 
+####To install this repository, please execute the following command:
+```shell
+pip install vm-operations
+```
+
+####To execute this repository, please execute the following command:
+```shell
+sudo python3 -m vm-operations
+```
+
 ### Benefits of this approach
 
 1. Maintanence of the code for the future. You are supposed to update the github repository instead of changing the scripts in each Virtual Machine Image.
