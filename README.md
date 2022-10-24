@@ -63,3 +63,4 @@ sudo python3 -m vm-operations
 Talha Unsel - talha.unsel@plusclouds.com  
 Yigithan Saglam - saglamyigithan@gmail.com
 Semih Yönet - semihyonet@gmail.com
+Zekican Budin - zekican.budin@plusclouds.com
