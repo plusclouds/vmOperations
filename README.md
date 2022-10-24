@@ -18,12 +18,12 @@ exec(urllib.request.urlopen(url_repo).read())
 
 #### To install this repository, please execute the following command:
 ```shell
-pip install -i https://test.pypi.org/simple/ vm-operations==0.0.1
+pip install -i https://test.pypi.org/simple/ vmoperations
 ```
 
 #### To execute this repository, please execute the following command:
 ```shell
-sudo python3 -m vm-operations
+sudo python3 -m vmoperations
 ```
 
 ### Benefits of this approach
