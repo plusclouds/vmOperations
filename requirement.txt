@@ -1,5 +1,0 @@
-distro
-requests
-hashlib
-logging
-verboselogs
