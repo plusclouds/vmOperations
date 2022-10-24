@@ -68,17 +68,17 @@ sudo python3 -m vmoperations
 - **create_folder_if_not_exists(dirname: str) -> None**
 	- create folder in given "dirname" path if not exists
 - **file_read(fname: str) -> str**
-		- reads and returns the first line of file located in "fname"
+	- reads and returns the first line of file located in "fname"
 - **file_write(fname: str, data: str) -> None**
-		- writes "data" to file located in "fname" by overwriting the file contents. 
+	- writes "data" to file located in "fname" by overwriting the file contents. 
 - **file_exists(fname: str) -> bool**
-		- returns true if file_exists otherise returns false.
+	- returns true if file_exists otherise returns false.
 - **get_distribution() -> str**
-		- returns the full distibution of the operating system. 
+	- returns the full distibution of the operating system. 
 - **extend_disk() -> None:**
-		- extends disk based on the current distribution
+	- extends disk based on the current distribution
 - **check_disk(uuid: str) -> None**
-		- checks if there are any changes in the disk and if there are, executes extend_disk function based on the 		current OS
+	- checks if there are any changes in the disk and if there are, executes extend_disk function based on the 		current OS
 #### module_search
 - **ansible_operations.py**
 	- execute_playbook_script (directory: str)
