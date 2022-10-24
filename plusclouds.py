@@ -1,46 +1,23 @@
 import json
-import pathlib
 import time
 import platform
-import urllib
-
-import distro
 import os
 import subprocess as sp
 import requests
+from . import storage
 from hashlib import sha256
-
-from urllib.request import urlopen
-
 import logging
 from logging.handlers import RotatingFileHandler
-from util.ssh_keys.ssh_key_parser import save_ssh_key
-
-#  This function takes filename as input, and then read it and return as a string variable
-import module_search.service_search
+from .util.ssh_keys.ssh_key_parser import save_ssh_key
+from .module_search.service_search import PlusCloudsService
 
 
-def create_file_if_not_exists(fname):
-	if not file_exists(fname):
-		file = open(fname, "w")
-		file.close()
-
-
-def create_folder_if_not_exists(dir_name):
-	os.makedirs(dir_name, exist_ok=True)
-
-
-def file_exists(fname):
-	return os.path.exists(fname)
-
-
+storage.create_folder_if_not_exists("/var/log/plusclouds")
 # Creates the isExtended file if it doesn't exists file
-create_folder_if_not_exists("/var/log/plusclouds")
-
-create_file_if_not_exists("/var/log/plusclouds/plusclouds.log")
-create_file_if_not_exists("/var/log/plusclouds/isExtended.txt")
-create_file_if_not_exists("/var/log/plusclouds/disklogs.txt")
-create_file_if_not_exists("/var/log/disklogs.txt")
+storage.create_file_if_not_exists("/var/log/plusclouds/plusclouds.log")
+storage.create_file_if_not_exists("/var/log/plusclouds/isExtended.txt")
+storage.create_file_if_not_exists("/var/log/plusclouds/disklogs.txt")
+storage.create_file_if_not_exists("/var/log/disklogs.txt")
 
 log_formatter = logging.Formatter(
 	'%(levelname)s %(lineno)4s => %(message)s ')
@@ -61,28 +38,12 @@ app_log.info("")
 app_log.info("============== Start of Execution at {}  =============".format(
 	time.asctime()))
 
-
-def file_read(fname):
-	with open(fname, "r") as myfile:
-		return myfile.readline().rstrip()
-
-
-def execute_script(url):
-	print(url)
-	exec(urllib.request.urlopen(url).read())
-
-
-def file_write(fname, data):
-	file = open(fname, "w+")
-	file.write(data)
-	file.close()
-
-
 base_url = os.getenv('LEO_URL', "http://api.plusclouds.com")
 
 if platform.system() == 'Linux':
 	# uuid of the vm assigned to uuid variable
-	uuid = sp.getoutput('/usr/sbin/dmidecode -s system-uuid')
+	uuid = sp.getoutput('/usr/sbin/dmidecode -s system-uuid') if not storage.file_exists(
+     '/var/local/temp_uuid.txt') else storage.file_read('/var/local/temp_uuid.txt')
 	# requests the information of the instance  sm
 	try:
 		response = requests.get(
@@ -93,7 +54,7 @@ if platform.system() == 'Linux':
 		response = response.json()
 
 	except requests.exceptions.ConnectionError as e:
-		if not file_exists("metadata.json"):
+		if not storage.file_exists("metadata.json"):
 			print("Cannot access API in {} url".format(base_url))
 			exit(-1)
 		metadata_file = open("metadata.json", "r")
@@ -115,20 +76,20 @@ if platform.system() == 'Linux':
 	# Password
 	app_log.info(" ------  Password Check  ------")
 	isChanged = False
-	if (file_exists('/var/log/plusclouds/passwordlogs.txt')):
-		oldPassword = file_read('/var/log/plusclouds/passwordlogs.txt')
+	if (storage.file_exists('/var/log/plusclouds/passwordlogs.txt')):
+		oldPassword = storage.file_read('/var/log/plusclouds/passwordlogs.txt')
 		if (oldPassword != password):
 			app_log.info(
 				'Password in API is different. Setting isChanged variable to True')
 			isChanged = True
-			file_write("/var/log/plusclouds/passwordlogs.txt", password)
+			storage.file_write("/var/log/plusclouds/passwordlogs.txt", password)
 		else:
 			app_log.info("Password is not changed in API.")
 	else:
 		app_log.info(
 			"Password log file doesn't exist. Setting isChanged variable to True")
 		isChanged = True
-		file_write("/var/log/plusclouds/passwordlogs.txt", password)
+		storage.file_write("/var/log/plusclouds/passwordlogs.txt", password)
 	if (isChanged == True):
 		app_log.info(
 			'isChanged variable is set to True. Executing password change call')
@@ -149,9 +110,9 @@ if platform.system() == 'Linux':
 				app_log.info(
 					'Installing unzipping and executing the ' + i["name"] + " execution files in url" + i["url"])
 
-				service = module_search.service_search.plusclouds_service(i["name"], i["url"],
-																		  i["callback_url"]["ansible_url"],
-																		  i["callback_url"]["service_url"])
+				service = PlusCloudsService(i["name"], i["url"],
+											i["callback_url"]["ansible_url"],
+											i["callback_url"]["service_url"])
 				try:
 					service.run()
 				except Exception as e:
@@ -161,7 +122,7 @@ if platform.system() == 'Linux':
 
 	# Hostname
 	app_log.info(" ------  Hostname Check  ------")
-	oldHostname = file_read('/etc/hostname')
+	oldHostname = storage.file_read('/etc/hostname')
 	if oldHostname != hostname:
 		app_log.info('Hostname is different in API. Changing hostname in VM.')
 		os.system('hostnamectl set-hostname {}'.format(hostname))
@@ -178,25 +139,24 @@ if platform.system() == 'Linux':
 	# Storage
 	app_log.info(" ------  Storage Check  ------")
 	url_repo = 'https://raw.githubusercontent.com/plusclouds/vmOperations/main/storage.py'
-	if (file_exists('/var/log/plusclouds/disklogs.txt')):
-		oldDisk = file_read('/var/log/plusclouds/disklogs.txt')
+	if (storage.file_exists('/var/log/plusclouds/disklogs.txt')):
+		oldDisk = storage.file_read('/var/log/plusclouds/disklogs.txt')
 		if oldDisk != total_disk:
 			app_log.info("Disk is changed from API. Executing storage.py")
-			import storage
-		if file_exists("/var/log/plusclouds/isExtended.txt"):
-			isExtended = file_read("/var/log/plusclouds/isExtended.txt")
+			storage.check_disk(uuid)
+		if storage.file_exists("/var/log/plusclouds/isExtended.txt"):
+			isExtended = storage.file_read("/var/log/plusclouds/isExtended.txt")
 			if isExtended == '1':
 				app_log.info(
 					"Disk is extended before reboot. Executing storage.py to resize")
-				import storage
+				storage.check_disk(uuid)
 	else:
 		app_log.info("Storage log file doesn't exist. Executing storage.py")
-		import storage
+		storage.check_disk(uuid)
 
 
 # Windows
 if platform.system() == 'Windows':
-	distroName = str(platform.system()) + '_' + str(platform.release())
 	uuid = sp.check_output('wmic bios get serialnumber').decode().split('\n')[
 		1].strip()
 	# Requests the information of the instance
@@ -209,21 +169,21 @@ if platform.system() == 'Windows':
 	# Password
 	app_log.info(" ------  Password Check  ------")
 	isChanged = False
-	if (file_exists('C:\Windows\System32\winevt\Logs\passwordlog.txt')):
-		oldPassword = file_read(
+	if (storage.file_exists('C:\Windows\System32\winevt\Logs\passwordlog.txt')):
+		oldPassword = storage.file_read(
 			'C:\Windows\System32\winevt\Logs\passwordlog.txt')
 		if (oldPassword != hashed_password):
 			app_log.info(
 				"Password in API is different. Setting isChanged to True")
 			isChanged = True
-			file_write(
+			storage.file_write(
 				"C:\Windows\System32\winevt\Logs\passwordlog.txt", hashed_password)
 		else:
 			app_log.info(
 				"Password hasn't been changed in API")
 	else:
 		isChanged = True
-		file_write("C:\Windows\System32\winevt\Logs\passwordlog.txt",
+		storage.file_write("C:\Windows\System32\winevt\Logs\passwordlog.txt",
 				   hashed_password)
 	if (isChanged == True):
 		app_log.info("Executing password change call.")
