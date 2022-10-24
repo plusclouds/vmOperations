@@ -18,7 +18,7 @@ exec(urllib.request.urlopen(url_repo).read())
 
 #### To install this repository, please execute the following command:
 ```shell
-pip install vm-operations
+pip install -i https://test.pypi.org/simple/ vm-operations==0.0.1
 ```
 
 #### To execute this repository, please execute the following command:
@@ -60,7 +60,7 @@ sudo python3 -m vm-operations
 
 ### Author Information
 
-Talha Unsel - talha.unsel@plusclouds.com  
-Yigithan Saglam - saglamyigithan@gmail.com
-Semih Yönet - semihyonet@gmail.com
-Zekican Budin - zekican.budin@plusclouds.com
+- Talha Unsel - talha.unsel@plusclouds.com   
+- Yigithan Saglam - saglamyigithan@gmail.com   
+- Semih Yönet - semihyonet@gmail.com   
+- Zekican Budin - zekican.budin@plusclouds.com   
