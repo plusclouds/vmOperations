@@ -11,9 +11,21 @@ from logging.handlers import RotatingFileHandler
 from .util.ssh_keys.ssh_key_parser import save_ssh_key
 from .module_search.service_search import PlusCloudsService
 
+#Returns the system uuid based on the system platform
+def get_uuid(platform: str) -> str:
+    if platform.lower() == 'linux':
+        return sp.getoutput('/usr/sbin/dmidecode -s system-uuid'
+                            ) if not storage.file_exists('/var/local/temp_uuid.txt'
+                            ) else storage.file_read('/var/local/temp_uuid.txt')
+                            
+    elif platform.lower() == 'windows':
+        return sp.check_output('wmic bios get serialnumber'
+                               ).decode().split('\n')[1].strip()
+        
+    else:
+        raise Exception("Platform: {} is not supported",platform.capitalize())
 
 storage.create_folder_if_not_exists("/var/log/plusclouds")
-# Creates the isExtended file if it doesn't exists file
 storage.create_file_if_not_exists("/var/log/plusclouds/plusclouds.log")
 storage.create_file_if_not_exists("/var/log/plusclouds/isExtended.txt")
 storage.create_file_if_not_exists("/var/log/plusclouds/disklogs.txt")
@@ -42,8 +54,7 @@ base_url = os.getenv('LEO_URL', "http://api.plusclouds.com")
 
 if platform.system() == 'Linux':
 	# uuid of the vm assigned to uuid variable
-	uuid = sp.getoutput('/usr/sbin/dmidecode -s system-uuid') if not storage.file_exists(
-     '/var/local/temp_uuid.txt') else storage.file_read('/var/local/temp_uuid.txt')
+	uuid = get_uuid(platform.system())
 	# requests the information of the instance  sm
 	try:
 		response = requests.get(
@@ -157,8 +168,7 @@ if platform.system() == 'Linux':
 
 # Windows
 if platform.system() == 'Windows':
-	uuid = sp.check_output('wmic bios get serialnumber').decode().split('\n')[
-		1].strip()
+	uuid = get_uuid(platform.system())
 	# Requests the information of the instance
 	response = requests.get(
 		'{}/v2/iaas/virtual-machines/meta-data?uuid={}'.format(base_url, uuid)).json()
