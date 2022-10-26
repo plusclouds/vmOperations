@@ -19,12 +19,12 @@ exec(urllib.request.urlopen(url_repo).read())
 
 #### To install this repository, please execute the following command:
 ```shell
-pip install -i https://test.pypi.org/simple/ vmoperations
+pip install -i https://test.pypi.org/simple/ plusclouds-service
 ```
 
 #### To execute this repository, please execute the following command:
 ```shell
-sudo python3 -m vmoperations
+sudo python3 -m plusclouds-service
 ```
 
 ### Benefits of this approach
@@ -52,7 +52,7 @@ sudo python3 -m vmoperations
 │   ├── callback_agent.py
 │   ├── playbook-test.yml
 │   └── service_search.py
-├── plusclouds.<area>py
+├── service.<area>py
 ├── storage.<area>py
 └── util
 	└── ssh_keys
@@ -105,7 +105,7 @@ sudo python3 -m vmoperations
 ### Performance Results
 
 - %400 faster deployment time.
-- %45 decreased bandwidth usage.
+- %65 decreased bandwidth usage.
 - %35 less errors during deployment.
 
 ### Author Information
