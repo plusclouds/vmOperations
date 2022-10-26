@@ -12,19 +12,19 @@ This python script has been written in order to decrease virtual machine deploym
 If the client make any change in the dashboard about the configurations that are listed below, this python script will detect changes, and apply these changes to the instance.
 Most of the essential parts of this code are executed on the fly. The code is not stored in VM instances but gets fetched from the repository and gets executed in RAM.
 
-```
-url_repo='https://raw.githubusercontent.com/plusclouds/vmOperations/main/plusclouds.py'
-exec(urllib.request.urlopen(url_repo).read())
-```
-
 #### To install this repository, please execute the following command:
 ```shell
-pip install -i https://test.pypi.org/simple/ plusclouds-service
+pip install plusclouds-service
 ```
 
-#### To execute this repository, please execute the following command:
+#### To execute this repository on Linux, please execute the following command:
 ```shell
 sudo python3 -m plusclouds-service
+```
+
+#### To execute this repository on Windows, please execute the following command:
+```shell
+python -m plusclouds-service
 ```
 
 ### Benefits of this approach

@@ -13,46 +13,48 @@ from .module_search.service_search import PlusCloudsService
 
 #Returns the system uuid based on the system platform
 def get_uuid(platform: str) -> str:
-    if platform.lower() == 'linux':
-        return sp.getoutput('/usr/sbin/dmidecode -s system-uuid'
-                            ) if not storage.file_exists('/var/local/temp_uuid.txt'
-                            ) else storage.file_read('/var/local/temp_uuid.txt')
-                            
-    elif platform.lower() == 'windows':
-        return sp.check_output('wmic bios get serialnumber'
-                               ).decode().split('\n')[1].strip()
-        
-    else:
-        raise Exception("Platform: {} is not supported",platform.capitalize())
+	if platform.lower() == 'linux':
+		return sp.getoutput('/usr/sbin/dmidecode -s system-uuid'
+							) if not storage.file_exists('/var/local/temp_uuid.txt'
+							) else storage.file_read('/var/local/temp_uuid.txt')
+							
+	elif platform.lower() == 'windows':
+		return sp.check_output('wmic bios get serialnumber'
+							   ).decode().split('\n')[1].strip()
+		
+	else:
+		raise Exception("Platform: {} is not supported",platform.capitalize())
 
-storage.create_folder_if_not_exists("/var/log/plusclouds")
-storage.create_file_if_not_exists("/var/log/plusclouds/plusclouds.log")
-storage.create_file_if_not_exists("/var/log/plusclouds/isExtended.txt")
-storage.create_file_if_not_exists("/var/log/plusclouds/disklogs.txt")
-storage.create_file_if_not_exists("/var/log/disklogs.txt")
+def initialize_logger():
+	log_formatter = logging.Formatter(
+		'%(levelname)s %(lineno)4s => %(message)s ')
 
-log_formatter = logging.Formatter(
-	'%(levelname)s %(lineno)4s => %(message)s ')
+	logFile = '/var/log/plusclouds/plusclouds.log' if platform.system(
+	) == 'Linux' else 'C:\Windows\System32\winevt\Logs\plusclouds.log'
 
-logFile = '/var/log/plusclouds/plusclouds.log' if platform.system(
-) == 'Linux' else 'C:\Windows\System32\winevt\Logs\plusclouds.log'
+	log_handler = RotatingFileHandler(
+		logFile, mode='a', maxBytes=2 * 1024 * 1024, backupCount=1, encoding=None, delay=0)
+	log_handler.setFormatter(log_formatter)
+	log_handler.setLevel(logging.INFO)
 
-log_handler = RotatingFileHandler(
-	logFile, mode='a', maxBytes=2 * 1024 * 1024, backupCount=1, encoding=None, delay=0)
-log_handler.setFormatter(log_formatter)
-log_handler.setLevel(logging.INFO)
+	app_log = logging.getLogger('root')
+	app_log.setLevel(logging.INFO)
 
-app_log = logging.getLogger('root')
-app_log.setLevel(logging.INFO)
-
-app_log.addHandler(log_handler)
-app_log.info("")
-app_log.info("============== Start of Execution at {}  =============".format(
-	time.asctime()))
+	app_log.addHandler(log_handler)
+	app_log.info("")
+	app_log.info("============== Start of Execution at {}  =============".format(
+		time.asctime()))
+	return app_log
 
 base_url = os.getenv('LEO_URL', "http://api.plusclouds.com")
 
 if platform.system() == 'Linux':
+	storage.create_folder_if_not_exists("/var/log/plusclouds")
+	storage.create_file_if_not_exists("/var/log/plusclouds/plusclouds.log")
+	storage.create_file_if_not_exists("/var/log/plusclouds/isExtended.txt")
+	storage.create_file_if_not_exists("/var/log/plusclouds/disklogs.txt")
+	storage.create_file_if_not_exists("/var/log/disklogs.txt")
+	app_log = initialize_logger()
 	# uuid of the vm assigned to uuid variable
 	uuid = get_uuid(platform.system())
 	# requests the information of the instance  sm
@@ -169,6 +171,7 @@ if platform.system() == 'Linux':
 # Windows
 if platform.system() == 'Windows':
 	uuid = get_uuid(platform.system())
+	app_log = initialize_logger()
 	# Requests the information of the instance
 	response = requests.get(
 		'{}/v2/iaas/virtual-machines/meta-data?uuid={}'.format(base_url, uuid)).json()
@@ -231,12 +234,12 @@ if platform.system() == 'Windows':
 
 		file = open(file_loc + '\\ansible_setup.ps1', 'w+')
 		file.write('''
-        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-        $url = "https://raw.githubusercontent.com/ansible/ansible/devel/examples/scripts/ConfigureRemotingForAnsible.ps1"
-        $file = "$env:temp\\ConfigureRemotingForAnsible.ps1"
-        (New-Object -TypeName System.Net.WebClient).DownloadFile($url, $file)
-        powershell.exe -ExecutionPolicy ByPass -File $file
-        ''')
+		[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+		$url = "https://raw.githubusercontent.com/ansible/ansible/devel/examples/scripts/ConfigureRemotingForAnsible.ps1"
+		$file = "$env:temp\\ConfigureRemotingForAnsible.ps1"
+		(New-Object -TypeName System.Net.WebClient).DownloadFile($url, $file)
+		powershell.exe -ExecutionPolicy ByPass -File $file
+		''')
 
 		file.close()
 
