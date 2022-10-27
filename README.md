@@ -9,8 +9,14 @@ This python script has been written in order to decrease virtual machine deploym
 2. Hostname
 3. Password
 
-If the client make any change in the dashboard about the configurations that are listed below, this python script will detect changes, and apply these changes to the instance.
-Most of the essential parts of this code are executed on the fly. The code is not stored in VM instances but gets fetched from the repository and gets executed in RAM.
+If the client make any change in the dashboard about the configurations that are listed below, this python script will detect changes, and apply these changes to the instance. Most of the essential parts of this code are executed on the fly. 
+
+```
+url_repo='https://raw.githubusercontent.com/plusclouds/vmOperations/main/plusclouds.py'
+exec(urllib.request.urlopen(url_repo).read())
+```
+
+Alternatively, this module can be installed directly to the virtual machines and can directly be executed
 
 #### To install this repository, please execute the following command:
 ```shell
