@@ -3,7 +3,8 @@ metadata.json
 services*
 __pycache__/
 .idea/
-
+*.del.py
+*.del.*
 #Distribution / packaging
 dist/
 build/
