@@ -4,7 +4,7 @@ import requests
 
 class CallbackAgent:
 	def __init__(self, url):
-		base_url = os.getenv('LEO_URL', "http://api.plusclouds.com")
+		base_url = os.getenv('LEO_URL', "https://api.plusclouds.com")
 
 		self.url = base_url + "/v2" + url
 		print("New Callback Agent formed, with the following url : {}".format(url))

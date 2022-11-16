@@ -11,10 +11,8 @@ def execute_playbook_script(directory: str):
 	path = "/".join(directory.split("/")[0:-1])
 
 	os.system("sudo apt install ansible -y")
-	result = os.system(
-		"ansible-playbook -i hosts " + directory + " > " + path + "/execution.log")  # haven't tried with -i hosts flag
+	result = os.system("ansible-playbook -i hosts " + directory + " > " + path + "/execution.log 2>&1")
 	print("Execution complete!")
-
 	return True, result
 
 

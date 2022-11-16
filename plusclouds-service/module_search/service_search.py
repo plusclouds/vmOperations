@@ -19,7 +19,7 @@ class PlusCloudsService:
 
 		self.callback_service_url = callback_service_url
 
-		self.callback_agent = CallbackAgent(self.callback_service_url)
+		self.callback_agent = CallbackAgent(self.callback_ansible_url)
 
 	def download_module(self):
 		if self.is_downloaded:
@@ -66,6 +66,6 @@ class PlusCloudsService:
 		log_file_content = log_file.read()
 
 		if len(log_file_content) == 0:
-			log_file_content = "-"
+			log_file_content = "Contents of ansible execution.log file missing."
 
 		self.callback_agent.completed(log_file_content)
