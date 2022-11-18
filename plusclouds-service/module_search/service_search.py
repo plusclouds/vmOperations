@@ -19,7 +19,9 @@ class PlusCloudsService:
 
 		self.callback_service_url = callback_service_url
 
-		self.callback_agent = CallbackAgent(self.callback_ansible_url)
+		self.callback_agent = CallbackAgent(self.callback_ansible_url,'ansible')
+		
+		self.service_agent = CallbackAgent(self.callback_service_url,'service')
 
 	def download_module(self):
 		if self.is_downloaded:
@@ -37,7 +39,7 @@ class PlusCloudsService:
 		result, log = execute_playbook_script(self.download_path + "/install.yml")
 		self.is_initiated = True
 		return result, log
-
+		
 	def run(self):
 		self.callback_agent.downloading("Downloading starting")
 		try:
@@ -69,3 +71,4 @@ class PlusCloudsService:
 			log_file_content = "Contents of ansible execution.log file missing."
 
 		self.callback_agent.completed(log_file_content)
+		self.service_agent.initiating("Initiating the service")
