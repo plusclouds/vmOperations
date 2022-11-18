@@ -3,17 +3,24 @@ import requests
 
 
 class CallbackAgent:
-	def __init__(self, url):
-		base_url = os.getenv('LEO_URL', "http://api.plusclouds.com")
+	def __init__(self, url, type):
+		self.type=type
+		base_url = os.getenv('LEO_URL', "https://api.plusclouds.com")
 
 		self.url = base_url + "/v2" + url
 		print("New Callback Agent formed, with the following url : {}".format(url))
 
 	def __send_message(self, status: str, message: str):
-		body = {
-			"service_report": message,
-			"service_status": status
-		}
+		if self.type=='ansible':
+			body = {
+				"ansible_report": message,
+				"ansible_status": status
+			}
+		elif self.type=='service':
+			body = {
+				"service_report": message,
+				"service_status": status
+			}
 		print("sending the following message", message)
 		requests.put(self.url, data=body)
 

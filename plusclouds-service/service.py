@@ -25,6 +25,10 @@ def get_uuid(platform: str) -> str:
 	else:
 		raise Exception("Platform: {} is not supported",platform.capitalize())
 
+def service_messager(service: PlusCloudsService, message: str, method: str) -> None:
+    if service != None:
+        getattr(service.service_agent,method)(message)
+
 def initialize_logger():
 	log_formatter = logging.Formatter(
 		'%(levelname)s %(lineno)4s => %(message)s ')
@@ -85,35 +89,7 @@ if platform.system() == 'Linux':
 	hostname = response['data']['hostname']
 	readablePassword = response['data']['password']
 	password = sha256(readablePassword.encode()).hexdigest()
-
-	# Password
-	app_log.info(" ------  Password Check  ------")
-	isChanged = False
-	if (storage.file_exists('/var/log/plusclouds/passwordlogs.txt')):
-		oldPassword = storage.file_read('/var/log/plusclouds/passwordlogs.txt')
-		if (oldPassword != password):
-			app_log.info(
-				'Password in API is different. Setting isChanged variable to True')
-			isChanged = True
-			storage.file_write("/var/log/plusclouds/passwordlogs.txt", password)
-		else:
-			app_log.info("Password is not changed in API.")
-	else:
-		app_log.info(
-			"Password log file doesn't exist. Setting isChanged variable to True")
-		isChanged = True
-		storage.file_write("/var/log/plusclouds/passwordlogs.txt", password)
-	if (isChanged == True):
-		app_log.info(
-			'isChanged variable is set to True. Executing password change call')
-		p = sp.Popen('passwd', stdout=sp.PIPE, stdin=sp.PIPE, stderr=sp.STDOUT)
-		stdout, stderr = p.communicate(
-			input="{0}\n{0}\n".format(readablePassword).encode())
-		if stderr:
-			app_log.error(stderr)
-		else:
-			app_log.info('Password has been updated successfully')
-
+	service = None
 	# Service Roles
 	if "serviceRoles" in response["data"].keys():
 		app_log.info(" ------  Service Roles Check  ------")
@@ -132,41 +108,84 @@ if platform.system() == 'Linux':
 					app_log.error(
 						"Exception occured while download and execution of service role {}, the following error has been caught {}".format(
 							i["name"], e))
-
+	# Password
+	app_log.info(" ------  Password Check  ------")
+	service_messager(service,"Starting password check","starting")
+	isChanged = False
+	if (storage.file_exists('/var/log/plusclouds/passwordlogs.txt')):
+		oldPassword = storage.file_read('/var/log/plusclouds/passwordlogs.txt')
+		if (oldPassword != password):
+			service_messager(service,"Password is different in API, initiating password change","initiating")
+			app_log.info(
+				'Password in API is different. Setting isChanged variable to True')
+			isChanged = True
+			storage.file_write("/var/log/plusclouds/passwordlogs.txt", password)
+		else:
+			app_log.info("Password is not changed in API.")
+	else:
+		service_messager(service,"Password log file doesn't exist. Creating log file","initiating")
+		app_log.info(
+			"Password log file doesn't exist. Setting isChanged variable to True")
+		isChanged = True
+		storage.file_write("/var/log/plusclouds/passwordlogs.txt", password)
+	if (isChanged == True):
+		app_log.info(
+			'isChanged variable is set to True. Executing password change call')
+		p = sp.Popen('passwd', stdout=sp.PIPE, stdin=sp.PIPE, stderr=sp.STDOUT)
+		stdout, stderr = p.communicate(
+			input="{0}\n{0}\n".format(readablePassword).encode())
+		if stderr:
+			service_messager(service,"Following error occurred while changing password:\n"+str(stderr),"failed")
+			app_log.error(stderr)
+		else:
+			service_messager(service,"Password has been updated successfully","completed")
+			app_log.info('Password has been updated successfully')
+	service_messager(service,"Password check is completed","completed")
+ 
 	# Hostname
 	app_log.info(" ------  Hostname Check  ------")
+	service_messager(service,"Starting hostname check", "starting")
 	oldHostname = storage.file_read('/etc/hostname')
 	if oldHostname != hostname:
+		service_messager(service,"Hostname is different in API. Initiating hostname change","initiating")
 		app_log.info('Hostname is different in API. Changing hostname in VM.')
 		os.system('hostnamectl set-hostname {}'.format(hostname))
 	else:
 		app_log.info('Hostname is not changed in API')
+	service_messager(service,"Hostname check is completed","completed")
 
+	# SSH Key
+	service_messager(service,"Starting SSH key check","starting")
 	app_log.info(" ------  SSH Key Check  ------")
 	if "SSHPublicKeys" in response["data"].keys() and "data" in response["data"]["SSHPublicKeys"] and len(
 			response["data"]["SSHPublicKeys"]["data"]) > 0:
 		ssh_keys = response["data"]["SSHPublicKeys"]["data"]
+		service_messager(service,"Saving ssh keys","initiating")
 		for ssh_key in ssh_keys:
 			save_ssh_key(ssh_key["ssh_encryption_type"], ssh_key["public_key"], ssh_key["email"])
+	service_messager(service,"SSH key check is completed","completed")
 
 	# Storage
 	app_log.info(" ------  Storage Check  ------")
-	url_repo = 'https://raw.githubusercontent.com/plusclouds/vmOperations/main/storage.py'
+	service_messager(service,"Starting storage check", "starting")
 	if (storage.file_exists('/var/log/plusclouds/disklogs.txt')):
 		oldDisk = storage.file_read('/var/log/plusclouds/disklogs.txt')
 		if oldDisk != total_disk:
-			app_log.info("Disk is changed from API. Executing storage.py")
+			service_messager("Disk is changed from API. Initiating check_disk","initiating")
+			app_log.info("Disk is changed from API. Executing check_disk")
 			storage.check_disk(uuid)
 		if storage.file_exists("/var/log/plusclouds/isExtended.txt"):
 			isExtended = storage.file_read("/var/log/plusclouds/isExtended.txt")
 			if isExtended == '1':
+				service_messager("Disk is extended before reboot. Executing check_disk to resize","initiating")
 				app_log.info(
-					"Disk is extended before reboot. Executing storage.py to resize")
+					"Disk is extended before reboot. Executing check_disk to resize")
 				storage.check_disk(uuid)
 	else:
-		app_log.info("Storage log file doesn't exist. Executing storage.py")
+		app_log.info("Storage log file doesn't exist. Executing check_disk")
+		service_messager(service,"Storage log file doesn't exist. Executing check_disk","initiating")
 		storage.check_disk(uuid)
-
+	service_messager(service,"Storage check is completed","completed")
 
 # Windows
 if platform.system() == 'Windows':
