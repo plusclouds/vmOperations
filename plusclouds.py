@@ -20,7 +20,7 @@ def check_module(module: str, os: str) -> bool:
 def execute_module(module: str, os: str) -> None:
     if check_module(module, os):
         if os == 'Linux':
-            sp.check_call(["sudo",sys.executable, "-m",module])
+            sp.check_call([sys.executable, "-m",module])
         else:
             sp.check_call([sys.executable, "-m",module])
     else:

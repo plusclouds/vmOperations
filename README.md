@@ -9,64 +9,86 @@ This python script has been written in order to decrease virtual machine deploym
 2. Hostname
 3. Password
 
-If the client make any change in the dashboard about the configurations that are listed below, this python script will detect changes, and apply these changes to the instance. Most of the essential parts of this code are executed on the fly. 
+If the client make any change in the dashboard about the configurations that are listed above, this python script will detect changes, and apply these changes to the instance. Most of the essential parts of this code are executed on the fly. 
+
+## Installing The plusclouds-service Module
+
+There are multiple alternative ways to install the module. **First one is preferred.**
+
+#### 1. By executing the following command
+
+```shell
+python3.8 -m pip install plusclouds-service
+```
+
+#### 2. By running the following code to install and run the module locally
 
 ```
+import urllib.request
 url_repo='https://raw.githubusercontent.com/plusclouds/vmOperations/main/plusclouds.py'
 exec(urllib.request.urlopen(url_repo).read())
 ```
 
-Alternatively, this module can be installed directly to the virtual machines and can directly be executed
+## How to execute
 
-#### To install this repository, please execute the following command:
 ```shell
-pip install plusclouds-service
+python3.8 -m plusclouds-service
 ```
 
-#### To execute this repository on Linux, please execute the following command:
-```shell
-sudo python3 -m plusclouds-service
-```
+## Benefits of this approach
 
-#### To execute this repository on Windows, please execute the following command:
-```shell
-python -m plusclouds-service
-```
+1. Maintanence of the code for the future.
+2. You can either update the github repository or update the pip module instead of changing the scripts in each Virtual Machine Image.
+3. The script can run locally and can be updated when necessary.
 
-### Benefits of this approach
+## Requirements
 
-1. Maintanence of the code for the future. You are supposed to update the github repository instead of changing the scripts in each Virtual Machine Image.
+- Python 3.8
+- Python3 distro package (1.8.0)
+- Python3 request package (2.28.1)
 
-### Requirements
+## Notes
 
-- Python3
-- Python3 distro package
-- Python3 request package
-
-### Notes
-
-- Logging is limited to two files that are 2MB each. You can change the size and count of log files by changing maxBytes, and backupCount input variables in RotatingFileHandler call.
-- For the hosname and password policy in Windows Servers, you can check the following links
+1. Logging is limited to two files that are 2MB each. You can change the size and count of log files by changing maxBytes, and backupCount input variables in RotatingFileHandler call.
+2. For the hosname and password policy in Windows Servers, you can check the following links
   - Password: https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/password-must-meet-complexity-requirements
   - Hostname: https://docs.microsoft.com/en-us/troubleshoot/windows-server/identity/naming-conventions-for-computer-domain-site-ou
+3. Instead of installing with the second option (By running the shown python script), it is best to periodically check for module updates by executing the following command.
+  - ```shell
+python3.8 -m pip install --upgrade plusclouds-service
+```
+  - Installing the module locally and running update checks every 12 hours instead will save up to 70mb of traffic per VM daily.
 
-### Folder Structure
+## Folder Structure
 <pre>
 .
-├── module_search
-│   ├── ansible_operations.py
-│   ├── callback_agent.py
-│   ├── playbook-test.yml
-│   └── service_search.py
-├── service.<area>py
-├── storage.<area>py
-└── util
-	└── ssh_keys
-	    └── ssh_key_parser.py
+├── LICENSE
+├── plusclouds.py
+├── plusclouds-service
+│   ├── __init__.py
+│   ├── __main__.py
+│   ├── module_search
+│   │   ├── ansible_operations.py
+│   │   ├── callback_agent.py
+│   │   ├── __init__.py
+│   │   └── service_search.py
+│   ├── requirements.txt
+│   ├── service.py
+│   ├── storage.py
+│   └── util
+│       └── ssh_keys
+│           ├── __init__.py
+│           └── ssh_key_parser.py
+├── pyproject.toml
+├── README.md
+└── requirements.txt
 </pre>
-### Documentation
+
+## Documentation
 
 #### plusclouds.py<area>
+- Code to be executed to install and run the plusclouds-service module.
+#### service.py<area>
 - The driver code for all the checks such as storage, hostname, and password. Responsible for handling the response taken from the server.
 #### storage.py<area>
 - **create_file_if_not_exists(fname: str) -> None**
@@ -98,7 +120,8 @@ python -m plusclouds-service
 		- creates a callback agent in given url
 - **service_search.py**
 	- class PlusCloudsService
-		- creates an instance of CallbackAgent and downloads service if missing. Initiates ansible and runs the playbook script.
+		- creates two instances of CallbackAgent, one for service reports, one for ansible reports and downloads service files if missing. Initiates ansible and runs the playbook script.
+
 ### Supported Distributions
 
 - Centos (7,8)
