@@ -51,13 +51,13 @@ python3.8 -m plusclouds-service
 
 1. Logging is limited to two files that are 2MB each. You can change the size and count of log files by changing maxBytes, and backupCount input variables in RotatingFileHandler call.
 2. For the hosname and password policy in Windows Servers, you can check the following links
-  - Password: https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/password-must-meet-complexity-requirements
-  - Hostname: https://docs.microsoft.com/en-us/troubleshoot/windows-server/identity/naming-conventions-for-computer-domain-site-ou
+	- Password: https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/password-must-meet-complexity-requirements
+	- Hostname: https://docs.microsoft.com/en-us/troubleshoot/windows-server/identity/naming-conventions-for-computer-domain-site-ou
 3. Instead of installing with the second option (By running the shown python script), it is best to periodically check for module updates by executing the following command.
-  - ```shell
+```shell
 python3.8 -m pip install --upgrade plusclouds-service
 ```
-  - Installing the module locally and running update checks every 12 hours instead will save up to 70mb of traffic per VM daily.
+4. Installing the module locally and running update checks every 12 hours instead will save up to 70mb of traffic per VM daily.
 
 ## Folder Structure
 <pre>
