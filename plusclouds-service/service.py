@@ -2,6 +2,7 @@ import json
 import time
 import platform
 import os
+import sys
 import subprocess as sp
 import requests
 from . import storage
@@ -10,6 +11,10 @@ import logging
 from logging.handlers import RotatingFileHandler
 from .util.ssh_keys.ssh_key_parser import save_ssh_key
 from .module_search.service_search import PlusCloudsService
+
+#Updates the pip module if there are any updates
+def update(module: str) -> None:
+    sp.check_call([sys.executable,'-m','pip','install',module,'--upgrade'])
 
 #Returns the system uuid based on the system platform
 def get_uuid(platform: str) -> str:
@@ -108,6 +113,20 @@ if platform.system() == 'Linux':
 					app_log.error(
 						"Exception occured while download and execution of service role {}, the following error has been caught {}".format(
 							i["name"], e))
+				#Check if api has update flag set to true
+				if(str(i["has_update"]).lower() == "true"):
+					try:
+						module = "plusclouds-service"
+						service_messager(service, "Starting to update the {} module".format(module),"starting")
+						update(module)
+						app_log.info("Updated {}".format(module))
+						service_messager(service, "Successfully updated the {} module".format(module),"completed")
+					except Exception as e:
+						service_messager(service, "Failed updating the {} module with following error {}".format(module,e),"failed")
+						app_log.error("Exception occurred while updating {}, following error has been caught {}".format(module,e))
+				else:
+					app_log.info("Service is not updated as has_update is not set to true")
+					service_messager(service, "Service is not updated as has_update is not set to true","completed")
 	# Password
 	app_log.info(" ------  Password Check  ------")
 	service_messager(service,"Starting password check","starting")
