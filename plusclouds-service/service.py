@@ -190,13 +190,13 @@ if platform.system() == 'Linux':
 	if (storage.file_exists('/var/log/plusclouds/disklogs.txt')):
 		oldDisk = storage.file_read('/var/log/plusclouds/disklogs.txt')
 		if oldDisk != total_disk:
-			service_messager("Disk is changed from API. Initiating check_disk","initiating")
+			service_messager(service,"Disk is changed from API. Initiating check_disk","initiating")
 			app_log.info("Disk is changed from API. Executing check_disk")
 			storage.check_disk(uuid)
 		if storage.file_exists("/var/log/plusclouds/isExtended.txt"):
 			isExtended = storage.file_read("/var/log/plusclouds/isExtended.txt")
 			if isExtended == '1':
-				service_messager("Disk is extended before reboot. Executing check_disk to resize","initiating")
+				service_messager(service,"Disk is extended before reboot. Executing check_disk to resize","initiating")
 				app_log.info(
 					"Disk is extended before reboot. Executing check_disk to resize")
 				storage.check_disk(uuid)

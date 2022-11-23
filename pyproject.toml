@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 [project]
 name = "plusclouds-service"
-version = "0.0.4"
+version = "0.0.6"
 authors = [
   { name="Talha Unsel", email="talha.unsel@plusclouds.com" },
   { name="Yigithan Saglam", email="saglamyigithan@gmail.com" },
