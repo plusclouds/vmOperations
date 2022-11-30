@@ -128,7 +128,6 @@ python3.8 -m pip install --upgrade plusclouds-service
 - Debian (9,10,11)
 - Pardus (18.0,19.0)
 - Ubuntu (16.04,18.04,19.04,19.10,20.04)
-- Fedora30
 - Windows Server (2016,2019)
 
 ### Performance Results

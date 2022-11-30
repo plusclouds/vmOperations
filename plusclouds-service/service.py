@@ -2,6 +2,7 @@ import json
 import time
 import platform
 import os
+import sys
 import subprocess as sp
 import requests
 from . import storage
@@ -10,6 +11,10 @@ import logging
 from logging.handlers import RotatingFileHandler
 from .util.ssh_keys.ssh_key_parser import save_ssh_key
 from .module_search.service_search import PlusCloudsService
+
+#Updates the pip module if there are any updates
+def update(module: str) -> None:
+    sp.check_call([sys.executable,'-m','pip','install',module,'--upgrade'])
 
 #Returns the system uuid based on the system platform
 def get_uuid(platform: str) -> str:
@@ -108,6 +113,20 @@ if platform.system() == 'Linux':
 					app_log.error(
 						"Exception occured while download and execution of service role {}, the following error has been caught {}".format(
 							i["name"], e))
+				#Check if api has update flag set to true
+				if(str(i["has_update"]).lower() == "true"):
+					try:
+						module = "plusclouds-service"
+						service_messager(service, "Starting to update the {} module".format(module),"starting")
+						update(module)
+						app_log.info("Updated {}".format(module))
+						service_messager(service, "Successfully updated the {} module".format(module),"completed")
+					except Exception as e:
+						service_messager(service, "Failed updating the {} module with following error {}".format(module,e),"failed")
+						app_log.error("Exception occurred while updating {}, following error has been caught {}".format(module,e))
+				else:
+					app_log.info("Service is not updated as has_update is not set to true")
+					service_messager(service, "Service is not updated as has_update is not set to true","completed")
 	# Password
 	app_log.info(" ------  Password Check  ------")
 	service_messager(service,"Starting password check","starting")
@@ -171,13 +190,13 @@ if platform.system() == 'Linux':
 	if (storage.file_exists('/var/log/plusclouds/disklogs.txt')):
 		oldDisk = storage.file_read('/var/log/plusclouds/disklogs.txt')
 		if oldDisk != total_disk:
-			service_messager("Disk is changed from API. Initiating check_disk","initiating")
+			service_messager(service,"Disk is changed from API. Initiating check_disk","initiating")
 			app_log.info("Disk is changed from API. Executing check_disk")
 			storage.check_disk(uuid)
 		if storage.file_exists("/var/log/plusclouds/isExtended.txt"):
 			isExtended = storage.file_read("/var/log/plusclouds/isExtended.txt")
 			if isExtended == '1':
-				service_messager("Disk is extended before reboot. Executing check_disk to resize","initiating")
+				service_messager(service,"Disk is extended before reboot. Executing check_disk to resize","initiating")
 				app_log.info(
 					"Disk is extended before reboot. Executing check_disk to resize")
 				storage.check_disk(uuid)
